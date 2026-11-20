@@ -5,6 +5,7 @@ Spring Boot(헥사고날) 백엔드 + Next.js 프론트엔드 모노레포 템�
 
 - `backend/` - Spring Boot 4.1, Java 25, Gradle(Kotlin DSL), PostgreSQL, Flyway
 - `frontend/` - Next.js 16, React 19, TypeScript, Tailwind 4
+- `infra/observability/` - 모니터링 스택 (Prometheus, Loki, Tempo, Grafana, Alloy)
 - `.github/` - CI, CodeQL, Dependabot, PR/이슈 템플릿
 
 ## 필요한 것
@@ -28,6 +29,8 @@ npm run dev
 ```
 
 http://localhost:3000
+
+모니터링은 [infra/observability](infra/observability/README.md) 참고.
 
 ## 새 프로젝트로 쓸 때
 
