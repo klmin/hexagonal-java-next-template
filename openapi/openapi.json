@@ -42,8 +42,8 @@
           "required" : true
         },
         "responses" : {
-          "200" : {
-            "description" : "OK",
+          "201" : {
+            "description" : "Created",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -159,14 +159,14 @@
             "type" : "string"
           },
           "description" : {
-            "type" : "string"
+            "type" : [ "string", "null" ]
           },
           "createdAt" : {
             "type" : "string",
             "format" : "date-time"
           }
         },
-        "required" : [ "createdAt", "id", "name" ]
+        "required" : [ "createdAt", "description", "id", "name" ]
       },
       "ItemPageResponse" : {
         "type" : "object",

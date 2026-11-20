@@ -64,7 +64,7 @@ export interface components {
             /** Format: int64 */
             id: number;
             name: string;
-            description?: string;
+            description: string | null;
             /** Format: date-time */
             createdAt: string;
         };
@@ -119,8 +119,8 @@ export interface operations {
             };
         };
         responses: {
-            /** @description OK */
-            200: {
+            /** @description Created */
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };
