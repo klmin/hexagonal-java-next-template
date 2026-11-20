@@ -14,7 +14,6 @@ export type CreateItemInput = {
   description?: string;
 };
 
-/** RFC 9457 Problem Details (백엔드 오류 응답 형식) */
 type ProblemDetail = {
   title?: string;
   status?: number;
@@ -32,7 +31,7 @@ export class ApiError extends Error {
 }
 
 async function backendUrl(path: string): Promise<string> {
-  // 런타임 환경변수를 읽도록 프리렌더를 여기서 멈춘다 (빌드 시점 값 고정 방지).
+  // 빌드 시점이 아니라 요청 시점의 BACKEND_URL을 읽도록
   await connection();
   const base = process.env.BACKEND_URL ?? "http://localhost:8080";
   return new URL(path, base).toString();
@@ -44,7 +43,7 @@ async function toApiError(res: Response): Promise<ApiError> {
     const problem = (await res.json()) as ProblemDetail;
     message = problem.detail ?? problem.title ?? message;
   } catch {
-    // 본문이 JSON이 아니면 기본 메시지를 쓴다.
+    // JSON이 아니면 기본 메시지 사용
   }
   return new ApiError(res.status, message);
 }

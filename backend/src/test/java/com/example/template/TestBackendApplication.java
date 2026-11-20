@@ -2,10 +2,7 @@ package com.example.template;
 
 import org.springframework.boot.SpringApplication;
 
-/**
- * Docker Compose 대신 Testcontainers로 DB를 띄워 로컬 실행할 때 사용한다.
- * ./gradlew bootTestRun
- */
+// ./gradlew bootTestRun (DB를 Testcontainers로 띄워서 실행)
 public class TestBackendApplication {
 
     public static void main(String[] args) {

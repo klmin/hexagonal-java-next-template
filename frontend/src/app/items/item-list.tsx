@@ -1,6 +1,6 @@
 import { listItems, type Item } from "@/lib/api/items";
 
-/** 요청마다 백엔드에서 새로 읽는다. 반드시 <Suspense> 안에서 렌더링한다. */
+// cacheComponents 환경이라 <Suspense> 안에서 렌더링해야 함
 export async function ItemList() {
   let items: Item[];
   try {
