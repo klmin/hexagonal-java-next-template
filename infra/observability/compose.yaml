@@ -10,7 +10,7 @@ name: template-observability
 
 services:
   alloy:
-    image: grafana/alloy:v1.22.0
+    image: grafana/alloy:v1.10.1
     command:
       - run
       - --server.http.listen-addr=0.0.0.0:12345
@@ -34,7 +34,7 @@ services:
     restart: unless-stopped
 
   prometheus:
-    image: prom/prometheus:v3.16.0
+    image: prom/prometheus:v3.5.0
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
@@ -49,7 +49,7 @@ services:
     restart: unless-stopped
 
   loki:
-    image: grafana/loki:3.7.10
+    image: grafana/loki:3.5.3
     command: -config.file=/etc/loki/config.yaml
     volumes:
       - ./loki/config.yaml:/etc/loki/config.yaml:ro
@@ -59,7 +59,7 @@ services:
     restart: unless-stopped
 
   tempo:
-    image: grafana/tempo:3.1.1
+    image: grafana/tempo:2.8.2
     command: -config.file=/etc/tempo/config.yaml
     # 기본 사용자(10001)는 새 볼륨에 쓸 수 없어서 root로 띄운다 (로컬용)
     user: "0"
@@ -71,7 +71,7 @@ services:
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:13.3.1
+    image: grafana/grafana:12.1.1
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
