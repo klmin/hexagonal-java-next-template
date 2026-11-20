@@ -42,8 +42,10 @@ jobs:
           npm run api:types
           git diff --exit-code src/lib/api/schema.d.ts || (echo "openapi.json 이 바뀌었습니다. frontend 에서 npm run api:types 후 커밋하세요." && exit 1)
 
+      - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
+      - run: npm test
       - run: npm run build
 
       - name: Docker 이미지 빌드 확인
