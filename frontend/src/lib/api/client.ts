@@ -41,14 +41,20 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   await connection();
   const url = new URL(path, serverEnv().BACKEND_URL);
 
-  const res = await fetch(url, {
-    // 백엔드가 응답하지 않을 때 화면이 계속 로딩 상태로 남지 않게
-    signal: AbortSignal.timeout(10_000),
-    ...init,
-    headers: { "Content-Type": "application/json", ...init?.headers },
-  });
+  // init.headers 가 Headers 객체여도 값이 빠지지 않게 Headers 로 합친다
+  const headers = new Headers(init?.headers);
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+  // 백엔드가 응답하지 않을 때 화면이 계속 로딩 상태로 남지 않게. 호출하는 쪽 signal 과 함께 쓴다
+  const timeout = AbortSignal.timeout(10_000);
+  const signal = init?.signal ? AbortSignal.any([timeout, init.signal]) : timeout;
+
+  const res = await fetch(url, { ...init, headers, signal });
   if (!res.ok) {
     throw await toApiError(res);
   }
-  return (await res.json()) as T;
+  // 204 No Content 등 본문이 없는 응답
+  const text = await res.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
