@@ -43,10 +43,17 @@ docker compose up -d --build --wait
 
 ## 새 프로젝트로 쓸 때
 
-1. GitHub에서 **Use this template**으로 저장소 생성
-2. 패키지명 `com.example.template`, `backend/build.gradle.kts`의 `group` 변경
-3. `.github/CODEOWNERS`, `LICENSE` 소유자 변경
-4. 샘플 `item` 기능은 참고 후 삭제
+1. GitHub에서 **Use this template**으로 저장소 생성 후 clone
+2. 이름, 패키지, 소유자 변경
+
+   ```bash
+   node scripts/init-project.mjs --name my-shop --package com.acme.shop --owner my-github-id
+   ```
+
+   패키지 폴더 이동, `group`, README 제목, compose 이름, CODEOWNERS, LICENSE를 바꾼다. `--dry-run`으로 미리 볼 수 있다.
+3. `git diff` 확인 후 `cd backend && ./gradlew build`
+4. 샘플 `item` 기능은 참고 후 삭제하거나 실제 도메인으로 교체
+5. 새 저장소에 PR 자동 리뷰 연결, main 보호 규칙 설정 (저장소 설정은 템플릿에서 복사되지 않음)
 
 작업 규칙은 [AGENTS.md](AGENTS.md) 참고.
 
