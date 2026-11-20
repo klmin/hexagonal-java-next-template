@@ -69,7 +69,8 @@ jobs:
       # Tempo metrics-generator 가 만든 span 메트릭이 Prometheus 에 들어오는지 본다
       - name: 트레이스 송신, 조회 확인
         run: |
-          trace_id=$(openssl rand -hex 16)
+          # 앞자리 0 이 있는 경우(Tempo 가 검색 결과에서 0 을 빼는 경우)를 매번 확인하려고 00 으로 시작한다
+          trace_id="00$(openssl rand -hex 15)"
           span_id=$(openssl rand -hex 8)
           now=$(date +%s%N)
           cat > /tmp/trace.json <<EOF
@@ -91,12 +92,14 @@ jobs:
           done
           [ -n "${found:-}" ] || { echo "Tempo 에서 트레이스를 찾지 못했습니다"; exit 1; }
 
-          # Grafana 트레이스 검색 화면이 쓰는 TraceQL 검색
+          # Grafana 트레이스 검색 화면이 쓰는 TraceQL 검색.
+          # 검색 결과의 traceID 는 앞자리 0 이 빠지므로(Tempo 3) 같은 형태로 맞춰 비교한다
+          search_id=$(echo "$trace_id" | sed 's/^0*//')
           for i in $(seq 1 30); do
             if curl -fsS -G 'http://localhost:3200/api/search' \
                 --data-urlencode 'q={ resource.service.name = "infra-ci" }' \
                 --data-urlencode "start=$(( $(date +%s) - 600 ))" --data-urlencode "end=$(date +%s)" \
-                | grep -q "$trace_id"; then
+                | grep -qE "\"0*${search_id}\""; then
               echo "TraceQL 검색됨"
               searched=1
               break
