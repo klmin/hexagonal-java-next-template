@@ -15,7 +15,7 @@
 # backend (JDK 25)
 cd backend && ./gradlew build
 
-# frontend (Node 22.22.2+ 또는 24.15+, CI는 24)
+# frontend (Node 22.22.2+, 24.15+ 또는 26+. CI와 Docker 이미지는 26 LTS)
 cd frontend && npm ci
 npm run format:check && npm run lint && npm run typecheck && npm test && npm run build
 ```

@@ -13,7 +13,7 @@ Spring Boot(헥사고날) 백엔드 + Next.js 프론트엔드 모노레포 템�
 ## 필요한 것
 
 - JDK 25
-- Node.js 22.22.2+ 또는 24.15+ (CI는 24. 25는 Vitest가 지원하지 않음)
+- Node.js 22.22.2+, 24.15+ 또는 26+ (CI와 Docker 이미지는 26 LTS. 25는 Vitest가 지원하지 않음)
 - Docker
 
 ## 실행
