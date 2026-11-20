@@ -2,14 +2,19 @@ package com.example.template.item.adapter.in.web;
 
 import com.example.template.item.application.port.in.CreateItemUseCase;
 import com.example.template.item.application.port.in.GetItemUseCase;
+import com.example.template.item.application.port.in.SearchItemsQuery;
+import com.example.template.item.application.port.in.SearchItemsUseCase;
 import com.example.template.item.domain.Item;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -22,10 +27,13 @@ public class ItemController {
 
     private final CreateItemUseCase createItemUseCase;
     private final GetItemUseCase getItemUseCase;
+    private final SearchItemsUseCase searchItemsUseCase;
 
-    public ItemController(CreateItemUseCase createItemUseCase, GetItemUseCase getItemUseCase) {
+    public ItemController(CreateItemUseCase createItemUseCase, GetItemUseCase getItemUseCase,
+                          SearchItemsUseCase searchItemsUseCase) {
         this.createItemUseCase = createItemUseCase;
         this.getItemUseCase = getItemUseCase;
+        this.searchItemsUseCase = searchItemsUseCase;
     }
 
     @PostMapping
@@ -46,5 +54,13 @@ public class ItemController {
     @GetMapping
     public List<ItemResponse> list() {
         return getItemUseCase.getItems().stream().map(ItemResponse::from).toList();
+    }
+
+    @GetMapping("/search")
+    public ItemPageResponse search(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
+        return ItemPageResponse.from(searchItemsUseCase.search(new SearchItemsQuery(keyword, page, size)));
     }
 }

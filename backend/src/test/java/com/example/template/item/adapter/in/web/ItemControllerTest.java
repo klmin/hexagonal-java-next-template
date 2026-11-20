@@ -4,6 +4,9 @@ import com.example.template.item.application.ItemNotFoundException;
 import com.example.template.item.application.port.in.CreateItemCommand;
 import com.example.template.item.application.port.in.CreateItemUseCase;
 import com.example.template.item.application.port.in.GetItemUseCase;
+import com.example.template.item.application.port.in.ItemSearchResult;
+import com.example.template.item.application.port.in.SearchItemsQuery;
+import com.example.template.item.application.port.in.SearchItemsUseCase;
 import com.example.template.item.domain.Item;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +39,9 @@ class ItemControllerTest {
 
     @MockitoBean
     private GetItemUseCase getItemUseCase;
+
+    @MockitoBean
+    private SearchItemsUseCase searchItemsUseCase;
 
     @Test
     void createReturns201WithLocation() throws Exception {
@@ -81,5 +87,22 @@ class ItemControllerTest {
         mockMvc.perform(get("/api/items"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("a"));
+    }
+
+    @Test
+    void searchReturnsPage() throws Exception {
+        given(searchItemsUseCase.search(new SearchItemsQuery("노트", 0, 20)))
+                .willReturn(new ItemSearchResult(List.of(Item.restore(1L, "노트북", null, NOW)), 1, 0, 20));
+
+        mockMvc.perform(get("/api/items/search").param("keyword", "노트"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].name").value("노트북"))
+                .andExpect(jsonPath("$.totalCount").value(1));
+    }
+
+    @Test
+    void searchRejectsTooLargePageSize() throws Exception {
+        mockMvc.perform(get("/api/items/search").param("size", "101"))
+                .andExpect(status().isBadRequest());
     }
 }

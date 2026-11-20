@@ -32,10 +32,11 @@ Docker가 없으면 Testcontainers 테스트는 skip되고 CI에서만 돈다.
 <feature>/application/service/       유스케이스 구현. @Transactional은 여기
 <feature>/application/               기능 예외 (예: ItemNotFoundException)
 <feature>/adapter/in/web/            컨트롤러, Request/Response DTO
-<feature>/adapter/out/persistence/   JPA 엔티티, Spring Data 리포지토리, 포트 구현
+<feature>/adapter/out/persistence/   JPA 엔티티/리포지토리, jOOQ 조회, 포트 구현
 common/error/                        공통 예외 (DomainValidationException, NotFoundException)
 common/web/                          전역 예외 처리 (Problem Details)
 common/config/                       공통 Bean
+common/jooq/                         jOOQ 생성 코드 (빌드 시 생성, 커밋 X)
 ```
 
 `HexagonalArchitectureTest`가 검사하는 규칙:
@@ -45,11 +46,13 @@ common/config/                       공통 Bean
 - adapter.in과 adapter.out은 서로 참조하지 않는다
 - 다른 기능은 그 기능의 `application.port.in`과 `domain`으로만 접근. 기능 간 순환 참조 금지
 - `common`은 특정 기능을 참조하지 않는다
+- jOOQ(`org.jooq`, `common.jooq`)는 adapter.out에서만 사용
 
 그 외:
 
 - JPA 엔티티, 리포지토리, 어댑터는 package-private. 엔티티를 어댑터 밖으로 내보내지 않고 도메인 모델로 변환한다
 - 도메인 규칙 위반은 `DomainValidationException`(400), 없는 리소스는 `NotFoundException`을 상속한 기능 예외(404)
+- 저장/수정은 JPA, 검색/통계 같은 조회는 jOOQ. jOOQ 코드는 Flyway 마이그레이션으로 빌드 때 생성되니 직접 고치지 않는다
 - 스키마 변경은 Flyway `V{n}__설명.sql`로만. 머지된 마이그레이션은 고치지 않는다
 - 현재 시각은 `Clock` Bean 주입 (`Instant.now()` 직접 호출 X)
 
@@ -58,7 +61,7 @@ common/config/                       공통 Bean
 - domain: 순수 단위 테스트
 - application.service: `port.out`을 인메모리 구현으로 바꿔서 단위 테스트
 - adapter.in.web: `@WebMvcTest` + `@MockitoBean`으로 유스케이스 mock
-- adapter.out.persistence: `@DataJpaTest` + Testcontainers PostgreSQL, `@Testcontainers(disabledWithoutDocker = true)`
+- adapter.out.persistence: JPA는 `@DataJpaTest`, jOOQ는 `@JooqTest`. 둘 다 Testcontainers PostgreSQL + `@Testcontainers(disabledWithoutDocker = true)`
 
 ## 프론트엔드
 
