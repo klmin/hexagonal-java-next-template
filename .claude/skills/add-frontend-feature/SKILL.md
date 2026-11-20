@@ -16,8 +16,8 @@ Next.js 16은 이전 버전과 API가 다르다. 쓰려는 기능의 문서를 `
 ## 1. API 클라이언트
 - 타입은 `src/lib/api/schema.d.ts`(생성 파일)의 `components["schemas"]`에서 가져온다. 스펙이 오래됐으면 백엔드에서 `./gradlew updateOpenApi`, 여기서 `npm run api:types`.
 - `src/lib/api/<기능>.ts`에 타입과 함수를 추가한다. 첫 줄은 `import "server-only";`.
-- 백엔드 주소는 `backendUrl()` 패턴(`await connection()` 후 `process.env.BACKEND_URL`)을 따른다.
-- `!res.ok`이면 Problem Details의 `detail`로 `ApiError`를 만든다. 공통 부분이 늘어나면 `src/lib/api/client.ts`로 분리한다.
+- 호출은 `src/lib/api/client.ts`의 `request<T>()`로 한다 (요청 시점 환경변수, 타임아웃, 오류 변환 포함).
+- 실패하면 `ApiError`(Problem Details의 `detail`, 필드 오류 포함)가 던져진다.
 
 ## 2. 조회 (서버 컴포넌트)
 - `src/app/<경로>/` 아래에 async 서버 컴포넌트로 만든다.
@@ -35,8 +35,12 @@ Next.js 16은 이전 버전과 API가 다르다. 쓰려는 기능의 문서를 `
 - 브라우저에서 백엔드를 직접 호출하지 않는다. 서버 전용 값을 `NEXT_PUBLIC_`으로 만들지 않는다.
 - 스타일은 Tailwind 유틸리티 클래스, 다크 모드는 `dark:` 변형을 같이 쓴다.
 
-## 5. 검증
+## 5. 테스트
+- 클라이언트 컴포넌트, 유틸은 Vitest로 (`create-item-form.test.tsx`, `client.test.ts` 참고). Server Action은 `vi.mock`으로 대체한다.
+- async 서버 컴포넌트는 Vitest로 테스트할 수 없으니 E2E에서 확인한다.
+
+## 6. 검증
 ```bash
-cd frontend && npm run lint && npm run typecheck && npm run build
+cd frontend && npm run format:check && npm run lint && npm run typecheck && npm test && npm run build
 ```
 가능하면 `npm run dev`로 띄워 실제 백엔드와 함께 생성, 조회, 오류 표시를 확인한다.

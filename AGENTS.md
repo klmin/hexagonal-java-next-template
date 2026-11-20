@@ -15,9 +15,9 @@
 # backend (JDK 25)
 cd backend && ./gradlew build
 
-# frontend (Node 20.9+)
+# frontend (Node 22.12+)
 cd frontend && npm ci
-npm run lint && npm run typecheck && npm run build
+npm run format:check && npm run lint && npm run typecheck && npm test && npm run build
 ```
 
 작업을 끝내기 전에 바뀐 쪽의 명령을 돌려서 통과시킨다.
@@ -69,10 +69,12 @@ common/jooq/                         jOOQ 생성 코드 (빌드 시 생성, 커�
 ## 프론트엔드
 
 - Next.js 16은 이전 버전과 API가 다르다. 코드 쓰기 전에 `frontend/node_modules/next/dist/docs/`에서 해당 문서를 확인한다
-- 백엔드 호출은 서버에서만. API 클라이언트는 `src/lib/api/`에 두고 `import "server-only"`. 주소는 `BACKEND_URL`
+- 백엔드 호출은 서버에서만. `src/lib/api/client.ts`의 `request()`를 쓰고 기능별 파일(`items.ts` 등)에 함수를 둔다. `import "server-only"` 필수
+- 서버 환경변수는 `src/lib/env.ts`(zod)에 추가하고 `serverEnv()`로 읽는다
 - 캐시하지 않는 데이터를 읽는 서버 컴포넌트는 `<Suspense>` 안에 둔다 (아니면 `next build` 실패)
 - 변경은 Server Action + `useActionState`. 성공하면 `refresh()`(`next/cache`). 예상 가능한 오류는 throw 말고 상태로 반환
-- `next lint`는 없다. `npm run lint` 사용
+- `next lint`는 없다. `npm run lint` 사용. 포맷은 Prettier(`npm run format`)
+- 테스트는 Vitest(`npm test`), 대상 파일 옆에 `*.test.ts(x)`. async 서버 컴포넌트는 E2E로 확인
 - 백엔드 API 타입은 `src/lib/api/schema.d.ts`(생성 파일)에서 가져온다. 직접 고치지 않는다
 
 ## API를 바꿀 때

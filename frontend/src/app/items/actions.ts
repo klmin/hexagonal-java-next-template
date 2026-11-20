@@ -2,7 +2,8 @@
 
 import { refresh } from "next/cache";
 
-import { ApiError, createItem } from "@/lib/api/items";
+import { ApiError } from "@/lib/api/client";
+import { createItem } from "@/lib/api/items";
 
 export type CreateItemState = {
   error?: string;

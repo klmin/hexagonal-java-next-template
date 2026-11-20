@@ -12,7 +12,7 @@ Spring Boot(헥사고날) 백엔드 + Next.js 프론트엔드 모노레포 템�
 ## 필요한 것
 
 - JDK 25
-- Node.js 20.9+
+- Node.js 22.12+
 - Docker
 
 ## 실행

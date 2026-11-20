@@ -18,7 +18,7 @@ cd backend && ./gradlew build
 
 ## frontend
 ```bash
-cd frontend && npm ci && npm run lint && npm run typecheck && npm run build
+cd frontend && npm ci && npm run format:check && npm run lint && npm run typecheck && npm test && npm run build
 ```
 - `node_modules`가 이미 최신이면 `npm ci`는 생략해도 된다.
 
