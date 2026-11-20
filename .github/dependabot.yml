@@ -56,6 +56,3 @@ updates:
       # PostgreSQL 메이저는 기존 데이터 볼륨과 호환되지 않아 직접 올린다
       - dependency-name: postgres
         update-types: ['version-update:semver-major']
-      # Tempo 3은 설정 형식이 바뀌었다(ingester, compactor 제거). tempo/config.yaml을 옮길 때 같이 올린다
-      - dependency-name: grafana/tempo
-        update-types: ['version-update:semver-major']
