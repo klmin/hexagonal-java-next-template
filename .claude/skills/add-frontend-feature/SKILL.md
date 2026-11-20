@@ -1,6 +1,6 @@
 ---
 name: add-frontend-feature
-description: 백엔드 API를 사용하는 Next.js 화면(조회 목록, 생성·수정 폼 등)을 추가한다. 새 페이지나 기존 페이지에 데이터 기능을 붙일 때 사용.
+description: 백엔드 API를 사용하는 Next.js 화면(조회 목록, 생성/수정 폼 등)을 추가한다. 새 페이지나 기존 페이지에 데이터 기능을 붙일 때 사용.
 ---
 
 # 프론트 기능 추가
@@ -9,7 +9,7 @@ description: 백엔드 API를 사용하는 Next.js 화면(조회 목록, 생성�
 
 ## 0. 먼저 문서 확인
 Next.js 16은 이전 버전과 API가 다르다. 쓰려는 기능의 문서를 `frontend/node_modules/next/dist/docs/01-app/`에서 확인한다.
-- 데이터 조회·캐시: `01-getting-started/08-caching.md`
+- 데이터 조회, 캐시: `01-getting-started/08-caching.md`
 - 변경(Server Action): `01-getting-started/07-mutating-data.md`
 - 오류 처리: `01-getting-started/10-error-handling.md`
 
@@ -20,7 +20,7 @@ Next.js 16은 이전 버전과 API가 다르다. 쓰려는 기능의 문서를 `
 
 ## 2. 조회 (서버 컴포넌트)
 - `src/app/<경로>/` 아래에 async 서버 컴포넌트로 만든다.
-- 캐시하지 않는 데이터는 페이지에서 `<Suspense fallback={…}>`로 감싼다. 감싸지 않으면 `next build`가 실패한다.
+- 캐시하지 않는 데이터는 페이지에서 `<Suspense fallback={...}>`로 감싼다. 감싸지 않으면 `next build`가 실패한다.
 - 백엔드 장애 시 페이지 전체가 깨지지 않도록 컴포넌트 안에서 오류 메시지를 보여 주거나 `error.tsx`를 둔다.
 - 동적 경로의 params는 `PageProps<'/경로/[id]'>`로 받고 `await props.params`로 읽는다.
 
@@ -38,4 +38,4 @@ Next.js 16은 이전 버전과 API가 다르다. 쓰려는 기능의 문서를 `
 ```bash
 cd frontend && npm run lint && npm run typecheck && npm run build
 ```
-가능하면 `npm run dev`로 띄워 실제 백엔드와 함께 생성·조회·오류 표시를 확인한다.
+가능하면 `npm run dev`로 띄워 실제 백엔드와 함께 생성, 조회, 오류 표시를 확인한다.

@@ -1,4 +1,4 @@
-# ./gradlew bootRun 실행 시 Spring Boot Docker Compose 지원으로 자동 기동됩니다.
+# bootRun 하면 spring-boot-docker-compose가 자동으로 띄움
 services:
   postgres:
     image: 'postgres:18-alpine'

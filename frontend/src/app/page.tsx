@@ -9,7 +9,7 @@ export default function Home() {
       <header>
         <h1 className="text-2xl font-semibold">Items</h1>
         <p className="text-sm text-zinc-500">
-          Next.js Server Action → Spring Boot <code>/api/items</code> 샘플
+          Spring Boot <code>/api/items</code> 연동 샘플
         </p>
       </header>
 
@@ -18,7 +18,7 @@ export default function Home() {
       </section>
 
       <section>
-        <Suspense fallback={<p className="text-sm text-zinc-500">불러오는 중…</p>}>
+        <Suspense fallback={<p className="text-sm text-zinc-500">불러오는 중...</p>}>
           <ItemList />
         </Suspense>
       </section>

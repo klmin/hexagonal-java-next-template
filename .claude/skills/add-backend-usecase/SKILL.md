@@ -1,49 +1,49 @@
 ---
 name: add-backend-usecase
-description: 백엔드에 새 기능(유스케이스)을 헥사고날 구조로 추가한다. 새 API, 새 도메인, 기존 도메인에 새 동작을 추가할 때 사용.
+description: 백엔드에 새 기능(유스케이스)을 기능별 패키지 + 헥사고날 구조로 추가한다. 새 API, 새 도메인, 기존 기능에 동작을 추가할 때 사용.
 ---
 
-# 백엔드 유스케이스 추가
+# 백엔드 기능 추가
 
-`Item` 샘플(`backend/src/main/java/com/example/template/`)을 참고 구현으로 삼아, 아래 순서대로 진행한다.
-규칙의 근거는 루트 `AGENTS.md`의 "백엔드 아키텍처 규칙"이다.
+`backend/src/main/java/com/example/template/item/`이 참고 구현이다. 규칙은 루트 `AGENTS.md`의 "백엔드 구조" 참고.
 
-## 1. 요구사항 정리
+## 1. 정리
 - 입력, 출력, 도메인 규칙, 오류 상황(400/404/409 등)을 먼저 정리한다.
-- 기존 도메인에 붙일지, 새 도메인 패키지(`domain/<기능>/`)를 만들지 결정한다.
+- 기존 기능 패키지에 넣을지, 새 기능 패키지(`<feature>/`)를 만들지 정한다.
+- 다른 기능의 데이터가 필요하면 그 기능의 `application.port.in` 유스케이스를 호출한다. 내부 클래스를 직접 쓰지 않는다.
 
-## 2. domain
-- `domain/<기능>/`에 모델을 만든다. 생성은 정적 팩토리(`create`, `restore`)로 하고 불변식은 생성 시점에 검사한다.
-- 규칙 위반은 `DomainValidationException`을 던진다.
+## 2. domain (`<feature>/domain/`)
+- 생성은 정적 팩토리(`create`, `restore`), 불변식은 생성 시점에 검사.
+- 규칙 위반은 `DomainValidationException`.
 - Spring, JPA, Jakarta Validation import 금지.
-- 테스트: `src/test/.../domain/<기능>/<모델>Test.java` (순수 단위 테스트)
+- 테스트: 순수 단위 테스트.
 
-## 3. application
-- `port/in/<동사><대상>UseCase.java` 인터페이스, 입력이 둘 이상이면 `<동사><대상>Command` record.
-- `port/out/`에 필요한 포트 인터페이스 (`Load…Port`, `Save…Port` 등 동작 단위로 작게).
-- `service/<대상>Service.java`에서 구현. 쓰기 메서드에 `@Transactional`, 클래스 기본은 `@Transactional(readOnly = true)`.
-- 리소스 없음 등은 `application/exception/`에 예외를 만들고 `GlobalExceptionHandler`에 매핑을 추가한다.
+## 3. application (`<feature>/application/`)
+- `port/in/<동사><대상>UseCase` 인터페이스, 입력이 여러 개면 `...Command` record.
+- `port/out/`에 필요한 포트 (`Load...Port`, `Save...Port`처럼 작게).
+- `service/`에서 구현. 클래스는 `@Transactional(readOnly = true)`, 쓰기 메서드만 `@Transactional`.
+- 없는 리소스는 `NotFoundException`을 상속한 예외를 `<feature>/application/`에 만든다 (전역 핸들러가 404로 변환).
 - 현재 시각은 `Clock` 주입.
-- 테스트: 출력 포트를 인메모리 구현으로 대체한 단위 테스트 (`ItemServiceTest` 참고).
+- 테스트: `port.out`을 인메모리 구현으로 바꾼 단위 테스트 (`ItemServiceTest` 참고).
 
-## 4. adapter.out.persistence
-- `adapter/out/persistence/<기능>/`에 `…JpaEntity`, `…JpaRepository`, `…PersistenceAdapter`(포트 구현). 모두 package-private.
-- 엔티티 ↔ 도메인 변환은 어댑터 안에서만 한다.
-- `src/main/resources/db/migration/V{다음번호}__설명.sql` 추가. 기존 마이그레이션은 수정하지 않는다.
+## 4. adapter.out.persistence (`<feature>/adapter/out/persistence/`)
+- `...JpaEntity`, `...JpaRepository`, `...PersistenceAdapter`(포트 구현). 전부 package-private.
+- 엔티티와 도메인 변환은 어댑터 안에서만.
+- `db/migration/V{다음번호}__설명.sql` 추가. 기존 파일은 수정하지 않는다.
 - 테스트: `@DataJpaTest` + `@AutoConfigureTestDatabase(replace = NONE)` + `@Import({TestcontainersConfiguration.class, 어댑터.class})` + `@Testcontainers(disabledWithoutDocker = true)`.
 
-## 5. adapter.in.web
-- `adapter/in/web/<기능>/`에 컨트롤러, `…Request`(Bean Validation), `…Response`(record, `from(도메인)`).
-- 컨트롤러는 `port.in` 인터페이스에만 의존한다.
+## 5. adapter.in.web (`<feature>/adapter/in/web/`)
+- 컨트롤러, `...Request`(Bean Validation), `...Response`(record, `from(도메인)`).
+- 컨트롤러는 `port.in`에만 의존.
 - 생성은 `201 Created` + `Location`.
-- 테스트: `@WebMvcTest(컨트롤러.class)` + `@MockitoBean` 유스케이스. 성공, 검증 실패(400, `application/problem+json`), 없음(404)을 확인.
+- 테스트: `@WebMvcTest(컨트롤러.class)` + `@MockitoBean`. 성공, 검증 실패(400, `errors`), 없음(404) 확인.
 
 ## 6. 검증
 ```bash
 cd backend && ./gradlew build
 ```
-`HexagonalArchitectureTest`가 실패하면 의존 방향을 고친다. 규칙을 우회하도록 테스트를 수정하지 않는다.
+`HexagonalArchitectureTest`가 실패하면 의존 방향을 고친다. 테스트를 바꿔서 통과시키지 않는다.
 
 ## 7. 마무리
-- `backend/README.md`의 API 표를 갱신한다.
-- 프론트 화면이 필요하면 `add-frontend-feature` 스킬로 이어서 진행한다.
+- `backend/README.md`의 샘플 API 목록을 갱신한다.
+- 화면이 필요하면 `add-frontend-feature`로 이어서 진행.
