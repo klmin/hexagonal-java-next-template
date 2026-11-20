@@ -34,7 +34,7 @@ jobs:
     permissions: {}
     env:
       # secrets 는 if 에서 바로 쓸 수 없어서 env 로 옮겨 검사한다
-      GH_TOKEN: ${{ secrets.CODEX_TRIGGER_PAT }}
+      GH_TOKEN: ${{ secrets.CODEX_TRIGGER_PAT_MISSING_TEST }}
     steps:
       - name: Skip (CODEX_TRIGGER_PAT not set)
         if: env.GH_TOKEN == ''
