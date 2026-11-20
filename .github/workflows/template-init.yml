@@ -50,6 +50,13 @@ jobs:
       - name: 초기화
         run: node scripts/init-project.mjs --name my-shop --package "${{ matrix.package }}" --owner my-github-id
 
+      - name: 템플릿 전용 워크플로가 지워졌는지 확인
+        run: |
+          if [ -e .github/workflows/template-init.yml ]; then
+            echo "init-project.mjs 가 template-init.yml 을 지우지 않았습니다"
+            exit 1
+          fi
+
       - name: 이전 이름이 남지 않았는지 확인
         env:
           PACKAGE: ${{ matrix.package }}

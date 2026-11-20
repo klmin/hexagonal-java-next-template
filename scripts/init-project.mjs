@@ -72,7 +72,16 @@ function trackedFiles() {
 }
 
 const TEXT = /\.(java|kts|ya?ml|md|json|mjs|ts|tsx|properties|sql|alloy|xml)$|^(CODEOWNERS|LICENSE|Dockerfile)$/;
-const SKIP = [/package-lock\.json$/, /schema\.d\.ts$/, /^openapi\//, /^scripts\/init-project\.mjs$/];
+// 템플릿 저장소에서만 쓰는 파일. 새 프로젝트에서는 의미가 없어서 지운다(4번).
+// template-init 워크플로는 이전 이름을 검사 패턴으로 갖고 있어, 치환하면 새 프로젝트에서 검사가 깨진다
+const TEMPLATE_ONLY = [".github/workflows/template-init.yml"];
+const SKIP = [
+  /package-lock\.json$/,
+  /schema\.d\.ts$/,
+  /^openapi\//,
+  /^scripts\/init-project\.mjs$/,
+  ...TEMPLATE_ONLY.map((f) => new RegExp(`^${f.replaceAll(".", "\\.")}$`)),
+];
 
 function rewrite(file, replacements) {
   const p = path.join(root, file);
@@ -158,6 +167,14 @@ for (const { javaDir, from, to } of moves) {
   removeEmptyParents(path.dirname(from), javaDir); // 비게 된 상위 폴더 정리 (com/example)
   fs.mkdirSync(path.dirname(to), { recursive: true });
   fs.renameSync(tmp, to);
+}
+
+// 4. 템플릿 전용 파일 삭제
+for (const file of TEMPLATE_ONLY) {
+  const p = path.join(root, file);
+  if (!fs.existsSync(p)) continue;
+  console.log(`delete ${file}`);
+  if (!dryRun) fs.rmSync(p);
 }
 
 console.log(`\n${dryRun ? "[dry-run] " : ""}${changed.length}개 파일 수정`);
