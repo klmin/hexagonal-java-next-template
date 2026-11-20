@@ -7,6 +7,8 @@ import com.example.template.item.application.port.in.GetItemUseCase;
 import com.example.template.item.application.port.out.LoadItemPort;
 import com.example.template.item.application.port.out.SaveItemPort;
 import com.example.template.item.domain.Item;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +18,8 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 public class ItemService implements CreateItemUseCase, GetItemUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(ItemService.class);
 
     private final SaveItemPort saveItemPort;
     private final LoadItemPort loadItemPort;
@@ -30,8 +34,9 @@ public class ItemService implements CreateItemUseCase, GetItemUseCase {
     @Override
     @Transactional
     public Item create(CreateItemCommand command) {
-        Item item = Item.create(command.name(), command.description(), clock.instant());
-        return saveItemPort.save(item);
+        Item saved = saveItemPort.save(Item.create(command.name(), command.description(), clock.instant()));
+        log.info("item created: id={}", saved.id());
+        return saved;
     }
 
     @Override
