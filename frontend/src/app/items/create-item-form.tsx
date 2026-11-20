@@ -6,25 +6,37 @@ import { createItemAction, type CreateItemState } from "./actions";
 
 const initialState: CreateItemState = {};
 
+const fieldClass =
+  "rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900 aria-invalid:border-red-600";
+
 export function CreateItemForm() {
   const [state, formAction, pending] = useActionState(createItemAction, initialState);
+  const errorId = "create-item-error";
 
   return (
     <form action={formAction} className="flex flex-col gap-3">
-      <input
-        name="name"
-        placeholder="이름"
-        maxLength={100}
-        required
-        className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
-      />
-      <textarea
-        name="description"
-        placeholder="설명 (선택)"
-        maxLength={500}
-        rows={2}
-        className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
-      />
+      <label className="flex flex-col gap-1 text-sm">
+        이름
+        <input
+          name="name"
+          maxLength={100}
+          required
+          defaultValue={state.values?.name}
+          aria-invalid={state.error ? true : undefined}
+          aria-describedby={state.error ? errorId : undefined}
+          className={fieldClass}
+        />
+      </label>
+      <label className="flex flex-col gap-1 text-sm">
+        설명 (선택)
+        <textarea
+          name="description"
+          maxLength={500}
+          rows={2}
+          defaultValue={state.values?.description}
+          className={fieldClass}
+        />
+      </label>
       <button
         type="submit"
         disabled={pending}
@@ -33,7 +45,7 @@ export function CreateItemForm() {
         {pending ? "추가 중..." : "추가"}
       </button>
       {state.error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p id={errorId} role="alert" className="text-sm text-red-600">
           {state.error}
         </p>
       )}

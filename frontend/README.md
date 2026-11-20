@@ -6,7 +6,7 @@ Next.js 16 (App Router, Cache Components) / React 19 / TypeScript / Tailwind 4
 
 ```bash
 cp .env.example .env.local   # BACKEND_URL
-npm install
+npm ci
 npm run dev
 ```
 
