@@ -5,8 +5,8 @@
 // 하는 일
 //   - 자바 패키지 com.example.template -> --package (폴더 이동 + 코드 치환)
 //   - build.gradle.kts group -> 패키지의 앞부분 (com.acme.shop -> com.acme)
-//   - README 제목, compose 프로젝트 이름 -> --name
-//   - CODEOWNERS, LICENSE 소유자 -> --owner
+//   - README 제목, compose 프로젝트 이름, 브라우저 탭 제목(layout.tsx) -> --name
+//   - CODEOWNERS, LICENSE 소유자 -> --owner (사용자 ID 또는 조직의 팀 org/team)
 // 끝나면 git diff로 확인하고 ./gradlew build 로 검증한다.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
@@ -40,8 +40,22 @@ if (!/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(values.package)) {
   console.error("--package 는 소문자 자바 패키지 형식이어야 합니다. 예) com.acme.shop");
   process.exit(1);
 }
-if (!/^[A-Za-z0-9-]+$/.test(values.owner)) {
-  console.error("--owner 는 GitHub 사용자/조직 ID 입니다. 예) my-github-id");
+// 자바 예약어는 패키지 이름에 쓸 수 없다(컴파일할 때 실패). 파일을 바꾸기 전에 막는다
+const JAVA_KEYWORDS = new Set(
+  ("abstract assert boolean break byte case catch char class const continue default do double else enum " +
+    "extends final finally float for goto if implements import instanceof int interface long native new " +
+    "package private protected public return short static strictfp super switch synchronized this throw " +
+    "throws transient try void volatile while true false null _")
+    .split(" "),
+);
+const keywordSegment = values.package.split(".").find((s) => JAVA_KEYWORDS.has(s));
+if (keywordSegment) {
+  console.error(`--package 에 자바 예약어 "${keywordSegment}" 를 쓸 수 없습니다. 예) com.acme.shop`);
+  process.exit(1);
+}
+// CODEOWNERS 는 사용자(@user) 또는 조직의 팀(@org/team)만 받는다. 조직 ID 하나만으로는 동작하지 않는다
+if (!/^[A-Za-z0-9-]+(\/[A-Za-z0-9_.-]+)?$/.test(values.owner)) {
+  console.error("--owner 는 GitHub 사용자 ID 또는 조직의 팀(org/team) 입니다. 예) my-github-id, acme/backend");
   process.exit(1);
 }
 
@@ -119,7 +133,11 @@ for (const file of trackedFiles()) {
   ];
   if (file === "backend/build.gradle.kts") replacements.push([`group = "${OLD_GROUP}"`, `group = "${newGroup}"`]);
   if (file === ".github/CODEOWNERS") replacements.push(["@klmin", `@${values.owner}`]);
-  if (file === "LICENSE") replacements.push(["Copyright (c) 2026 klmin", `Copyright (c) ${new Date().getFullYear()} ${values.owner}`]);
+  if (file === "LICENSE") {
+    const holder = values.owner.split("/")[0];
+    replacements.push(["Copyright (c) 2026 klmin", `Copyright (c) ${new Date().getFullYear()} ${holder}`]);
+  }
+  if (file === "frontend/src/app/layout.tsx") replacements.push(['title: "Hexagonal Template"', `title: "${values.name}"`]);
   rewrite(file, replacements);
 }
 
