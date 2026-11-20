@@ -74,7 +74,8 @@ common/jooq/                         jOOQ 생성 코드 (빌드 시 생성, 커�
 - 캐시하지 않는 데이터를 읽는 서버 컴포넌트는 `<Suspense>` 안에 둔다 (아니면 `next build` 실패)
 - 변경은 Server Action + `useActionState`. 성공하면 `refresh()`(`next/cache`). 예상 가능한 오류는 throw 말고 상태로 반환
 - `next lint`는 없다. `npm run lint` 사용. 포맷은 Prettier(`npm run format`)
-- 테스트는 Vitest(`npm test`), 대상 파일 옆에 `*.test.ts(x)`. async 서버 컴포넌트는 E2E로 확인
+- 테스트는 Vitest(`npm test`), 대상 파일 옆에 `*.test.ts(x)`. async 서버 컴포넌트와 화면 흐름은 Playwright(`e2e/`)로 확인
+- E2E는 루트 `compose.yaml`로 전체 스택을 띄우고 `npm run test:e2e`. 데이터가 쌓이므로 테스트마다 고유한 값을 쓴다
 - 백엔드 API 타입은 `src/lib/api/schema.d.ts`(생성 파일)에서 가져온다. 직접 고치지 않는다
 
 ## API를 바꿀 때

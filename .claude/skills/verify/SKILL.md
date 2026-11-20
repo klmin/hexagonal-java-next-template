@@ -22,6 +22,14 @@ cd frontend && npm ci && npm run format:check && npm run lint && npm run typeche
 ```
 - `node_modules`가 이미 최신이면 `npm ci`는 생략해도 된다.
 
+## e2e (화면 흐름을 바꿨을 때)
+```bash
+(cd backend && ./gradlew bootJar)
+docker compose up -d --build --wait
+cd frontend && npm run test:e2e
+docker compose down -v
+```
+
 ## 보고
 - 각 단계의 통과/실패, 실패한 테스트, 오류 메시지 핵심, 건너뛴 항목을 짧게 정리한다.
 - 실패를 고친 경우 무엇을 고쳤는지 함께 적는다. 검사를 끄거나 테스트를 삭제해서 통과시키지 않는다.

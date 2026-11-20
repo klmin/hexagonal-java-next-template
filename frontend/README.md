@@ -19,6 +19,7 @@ npm run dev
 - `npm run lint` - ESLint (Next 16부터 `next lint` 없음)
 - `npm run format` / `npm run format:check` - Prettier (Tailwind 클래스 정렬 포함)
 - `npm test` - Vitest
+- `npm run test:e2e` - Playwright (앱이 떠 있어야 함)
 - `npm run typecheck` - `next typegen && tsc --noEmit`
 - `npm run api:types` - `../openapi/openapi.json`에서 `src/lib/api/schema.d.ts` 생성
 
@@ -26,6 +27,20 @@ npm run dev
 
 Vitest + Testing Library. 파일은 대상 옆에 `*.test.ts(x)`로 둔다.
 async 서버 컴포넌트는 Vitest가 지원하지 않아서 E2E로 확인한다.
+
+E2E는 Playwright로 `e2e/`에 둔다. 떠 있는 앱을 대상으로 돈다.
+
+```bash
+# 루트에서 전체 스택 실행
+(cd backend && ./gradlew bootJar)
+docker compose up -d --build --wait
+
+# frontend
+npx playwright install chromium   # 처음 한 번
+npm run test:e2e                  # 기본 대상 http://localhost:3000 (E2E_BASE_URL로 변경)
+```
+
+CI(`.github/workflows/e2e.yml`)도 같은 방식으로 돈다.
 
 ## API 타입
 
