@@ -37,6 +37,13 @@ updates:
     directories: ['/backend', '/frontend']
     schedule:
       interval: weekly
+    ignore:
+      # 런타임 메이저는 LTS에 맞춰 직접 올린다(홀수 Node, 비 LTS JDK가 올라오지 않게).
+      # Node는 frontend package.json engines, CI node-version과, JDK는 build.gradle.kts toolchain과 같이 바꾼다
+      - dependency-name: node
+        update-types: ['version-update:semver-major']
+      - dependency-name: eclipse-temurin
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: docker-compose
     directories: ['/', '/backend', '/infra/observability']
@@ -45,3 +52,7 @@ updates:
     groups:
       observability:
         patterns: ['grafana/*', 'prom/*']
+    ignore:
+      # PostgreSQL 메이저는 기존 데이터 볼륨과 호환되지 않아 직접 올린다
+      - dependency-name: postgres
+        update-types: ['version-update:semver-major']
