@@ -54,3 +54,8 @@ OTLP_TRACING_ENABLED=true LOG_FILE=logs/backend.log ./gradlew bootRun
 - 트레이스가 많으면 `alloy/config.alloy`의 batch 앞에 `otelcol.processor.tail_sampling`을 넣어서 에러와 느린 요청 위주로 남긴다.
 - 보관 기간은 Prometheus 15일(`PROMETHEUS_RETENTION`), Loki/Tempo 14일(각 config).
 - Grafana 관리자 비밀번호는 `.env`에서 바꾼다.
+
+## 버전을 올릴 때
+
+- Tempo는 3.x(단일 실행, Kafka 없음)다. 2.x에서 쓰던 `tempo-data` 볼륨으로 시작이 안 되면 로컬 데이터라 지우고 다시 띄운다: `docker compose down -v && docker compose up -d`
+- 이미지 버전은 Dependabot이 올린다. CI(`infra` 워크플로)가 스택을 띄워 준비 상태와 트레이스 저장, 조회까지 확인한다
