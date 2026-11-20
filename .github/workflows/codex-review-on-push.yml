@@ -5,6 +5,7 @@
 # - 댓글은 개인 토큰(secret CODEX_TRIGGER_PAT)으로 단다. Codex 는 댓글 작성자가 Codex 계정과 연결된 사용자일 때만 리뷰하므로
 #   기본 GITHUB_TOKEN(github-actions[bot])으로는 "create a Codex account" 답만 온다.
 #   토큰: fine-grained, 이 저장소만, Pull requests·Issues Read and write. 만료되면 갱신해야 한다
+# - secret 이 없으면(템플릿으로 막 만든 저장소 등) 실패하지 않고 안내만 남기고 넘어간다
 name: Codex review on push
 
 on:
@@ -31,10 +32,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}
+    env:
+      # secrets 는 if 에서 바로 쓸 수 없어서 env 로 옮겨 검사한다
+      GH_TOKEN: ${{ secrets.CODEX_TRIGGER_PAT }}
     steps:
+      - name: Skip (CODEX_TRIGGER_PAT not set)
+        if: env.GH_TOKEN == ''
+        run: echo "::notice::CODEX_TRIGGER_PAT secret 이 없어 Codex 리뷰 요청을 건너뜁니다. 필요하면 PR 에 직접 \"@codex review\" 를 다세요."
+
       - name: Comment "@codex review"
+        if: env.GH_TOKEN != ''
         run: gh pr comment "$PR_NUMBER" --body "@codex review"
         env:
-          GH_TOKEN: ${{ secrets.CODEX_TRIGGER_PAT }}
           GH_REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}

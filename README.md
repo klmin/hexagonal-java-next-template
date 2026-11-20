@@ -54,6 +54,9 @@ docker compose up -d --build --wait
 3. `git diff` 확인 후 `cd backend && ./gradlew build`
 4. 샘플 `item` 기능은 참고 후 삭제하거나 실제 도메인으로 교체
 5. 새 저장소에 PR 자동 리뷰 연결, main 보호 규칙 설정 (저장소 설정은 템플릿에서 복사되지 않음)
+   - PR에 push할 때마다 Codex 리뷰를 요청하려면(`.github/workflows/codex-review-on-push.yml`) Actions secret `CODEX_TRIGGER_PAT`을 등록한다.
+     Codex 계정과 연결된 본인 GitHub의 fine-grained token(이 저장소만, Pull requests·Issues Read and write).
+     등록하지 않으면 이 워크플로는 요청 없이 건너뛴다
 
 작업 규칙은 [AGENTS.md](AGENTS.md) 참고.
 
