@@ -67,7 +67,13 @@ class HexagonalArchitectureTest {
             .that().resideInAnyPackage("..application.port.in..", "..application.port.out..")
             .and().haveSimpleNameNotEndingWith("Command")
             .and().haveSimpleNameNotEndingWith("Query")
+            .and().haveSimpleNameNotEndingWith("Result")
             .should().beInterfaces();
+
+    @ArchTest
+    static final ArchRule onlyOutboundAdaptersUseJooq = noClasses()
+            .that().resideOutsideOfPackages("..adapter.out..", ROOT + ".common.jooq..")
+            .should().dependOnClassesThat().resideInAnyPackage("org.jooq..", ROOT + ".common.jooq..");
 
     @ArchTest
     static final ArchRule commonDoesNotDependOnFeatures = classes()
