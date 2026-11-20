@@ -37,7 +37,7 @@ Next.js 16은 이전 버전과 API가 다르다. 쓰려는 기능의 문서를 `
 
 ## 5. 테스트
 - 클라이언트 컴포넌트, 유틸은 Vitest로 (`create-item-form.test.tsx`, `client.test.ts` 참고). Server Action은 `vi.mock`으로 대체한다.
-- async 서버 컴포넌트는 Vitest로 테스트할 수 없으니 E2E에서 확인한다.
+- async 서버 컴포넌트와 화면 흐름은 `e2e/`에 Playwright 테스트를 추가한다 (`items.spec.ts` 참고). Next.js 라우트 안내 요소가 `role=alert`이라 alert는 범위를 좁혀서 찾는다.
 
 ## 6. 검증
 ```bash
