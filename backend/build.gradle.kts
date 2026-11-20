@@ -39,4 +39,23 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    testLogging {
+        // CI 로그에서 건너뛴 테스트(예: Docker 없음)와 실패를 바로 확인할 수 있게 한다.
+        events("skipped", "failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
+    // 모든 테스트 클래스가 끝난 뒤 요약을 출력한다.
+    addTestListener(object : TestListener {
+        override fun beforeSuite(suite: TestDescriptor) {}
+        override fun beforeTest(testDescriptor: TestDescriptor) {}
+        override fun afterTest(testDescriptor: TestDescriptor, result: TestResult) {}
+        override fun afterSuite(suite: TestDescriptor, result: TestResult) {
+            if (suite.parent == null) {
+                println(
+                    "Tests: ${result.testCount}, passed: ${result.successfulTestCount}, " +
+                        "failed: ${result.failedTestCount}, skipped: ${result.skippedTestCount}"
+                )
+            }
+        }
+    })
 }
