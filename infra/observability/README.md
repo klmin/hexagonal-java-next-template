@@ -12,6 +12,9 @@ backend
 ## 띄우기
 
 ```bash
+# 앱 로그 폴더를 먼저 만든다. 없으면 Linux에서 Docker가 root 소유로 만들어 앱이 로그 파일을 쓰지 못한다
+mkdir -p backend/logs
+
 cd infra/observability
 cp .env.example .env
 docker compose up -d
