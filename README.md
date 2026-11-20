@@ -50,13 +50,18 @@ docker compose up -d --build --wait
    node scripts/init-project.mjs --name my-shop --package com.acme.shop --owner my-github-id
    ```
 
-   패키지 폴더 이동, `group`, README 제목, compose 이름, CODEOWNERS, LICENSE를 바꾼다. `--dry-run`으로 미리 볼 수 있다.
-3. `git diff` 확인 후 `cd backend && ./gradlew build`
+   패키지 폴더 이동, `group`, README 제목, 브라우저 탭 제목, compose 이름, CODEOWNERS, LICENSE를 바꾼다. `--dry-run`으로 미리 볼 수 있다.
+   조직 저장소면 `--owner`에 팀을 준다(`--owner acme/backend`). CODEOWNERS는 조직 ID만으로는 동작하지 않는다.
+3. `git diff` 확인 후 `cd backend && ./gradlew build` (Docker 필요)
 4. 샘플 `item` 기능은 참고 후 삭제하거나 실제 도메인으로 교체
-5. 새 저장소에 PR 자동 리뷰 연결, main 보호 규칙 설정 (저장소 설정은 템플릿에서 복사되지 않음)
-   - PR에 push할 때마다 Codex 리뷰를 요청하려면(`.github/workflows/codex-review-on-push.yml`) Actions secret `CODEX_TRIGGER_PAT`을 등록한다.
+5. 저장소 설정 (템플릿에서 복사되지 않음)
+   - **PR 자동 리뷰**: PR에 push할 때마다 Codex 리뷰를 요청하려면(`.github/workflows/codex-review-on-push.yml`) Actions secret `CODEX_TRIGGER_PAT`을 등록한다.
      Codex 계정과 연결된 본인 GitHub의 fine-grained token(이 저장소만, Pull requests·Issues Read and write).
      등록하지 않으면 이 워크플로는 요청 없이 건너뛴다
+   - **main 보호 규칙**: `backend`, `frontend`, `e2e`, `template-init`, `infra` 워크플로는 바뀐 경로에서만 돈다.
+     이 검사들을 필수(required)로 지정하면 해당 경로를 건드리지 않은 PR은 검사를 계속 기다리며 머지할 수 없다.
+     필수로는 모든 PR에서 도는 CodeQL `analyze (...)`만 지정하고, 나머지는 리뷰할 때 확인한다
+   - **CodeQL**: 비공개 저장소는 GitHub Code Security(Advanced Security)가 있어야 결과를 올릴 수 있다. 없으면 `codeql` 워크플로가 실패하니 `.github/workflows/codeql.yml`을 지운다
 
 작업 규칙은 [AGENTS.md](AGENTS.md) 참고.
 
