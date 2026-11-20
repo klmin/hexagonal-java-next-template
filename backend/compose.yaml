@@ -1,0 +1,10 @@
+# ./gradlew bootRun 실행 시 Spring Boot Docker Compose 지원으로 자동 기동됩니다.
+services:
+  postgres:
+    image: 'postgres:18-alpine'
+    environment:
+      - 'POSTGRES_DB=template'
+      - 'POSTGRES_USER=template'
+      - 'POSTGRES_PASSWORD=template'
+    ports:
+      - '5432'
