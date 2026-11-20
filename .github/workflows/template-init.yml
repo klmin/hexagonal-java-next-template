@@ -55,8 +55,11 @@ jobs:
           PACKAGE: ${{ matrix.package }}
         run: |
           left=$(git grep -n -I -E 'hexagonal-spring-next-template|Hexagonal Template|@klmin' -- ':!scripts/' ':!.github/workflows/template-init.yml' || true)
-          # 새 패키지가 기존 패키지를 포함하는 경우(com.example.template.shop)는 새 패키지 이름으로 남는 것만 허용
-          old=$(git grep -n -I -E 'com[./]example[./]template' -- ':!scripts/' ':!.github/workflows/template-init.yml' | grep -v -E "$(echo "$PACKAGE" | sed 's/\./[.\/]/g')" || true)
+          # 새 패키지가 기존 패키지를 포함하는 경우(com.example.template.shop)는 새 패키지 이름과
+          # 그 앞부분인 group(com.example.template)으로 남는 것만 허용
+          old=$(git grep -n -I -E 'com[./]example[./]template' -- ':!scripts/' ':!.github/workflows/template-init.yml' \
+            | grep -v -E "$(echo "$PACKAGE" | sed 's/\./[.\/]/g')" \
+            | grep -v -E '^backend/build\.gradle\.kts:[0-9]+:group = ' || true)
           if [ -n "$left$old" ]; then
             echo "$left"
             echo "$old"
