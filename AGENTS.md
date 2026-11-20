@@ -5,6 +5,7 @@
 ## 구성
 
 - `backend/` - Spring Boot 4.1, Java 25, Gradle(Kotlin DSL), PostgreSQL, Flyway ([README](backend/README.md))
+- `openapi/openapi.json` - API 계약. 백엔드 `./gradlew updateOpenApi`로 생성, 프론트 `npm run api:types`로 타입 생성
 - `infra/observability/` - 로컬 모니터링 스택 ([README](infra/observability/README.md))
 - `frontend/` - Next.js 16 (App Router, Cache Components), React 19, TypeScript, Tailwind 4 ([README](frontend/README.md), [AGENTS](frontend/AGENTS.md))
 
@@ -72,6 +73,13 @@ common/jooq/                         jOOQ 생성 코드 (빌드 시 생성, 커�
 - 캐시하지 않는 데이터를 읽는 서버 컴포넌트는 `<Suspense>` 안에 둔다 (아니면 `next build` 실패)
 - 변경은 Server Action + `useActionState`. 성공하면 `refresh()`(`next/cache`). 예상 가능한 오류는 throw 말고 상태로 반환
 - `next lint`는 없다. `npm run lint` 사용
+- 백엔드 API 타입은 `src/lib/api/schema.d.ts`(생성 파일)에서 가져온다. 직접 고치지 않는다
+
+## API를 바꿀 때
+
+1. 백엔드 수정 후 `cd backend && ./gradlew updateOpenApi`
+2. `cd frontend && npm run api:types`
+3. `openapi/openapi.json`, `frontend/src/lib/api/schema.d.ts`를 코드와 같이 커밋
 
 ## Git / PR
 

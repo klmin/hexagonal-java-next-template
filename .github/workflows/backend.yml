@@ -5,10 +5,12 @@ on:
     branches: [main]
     paths:
       - 'backend/**'
+      - 'openapi/**'
       - '.github/workflows/backend.yml'
   pull_request:
     paths:
       - 'backend/**'
+      - 'openapi/**'
       - '.github/workflows/backend.yml'
 
 permissions:
@@ -37,6 +39,9 @@ jobs:
       # Testcontainers 테스트 포함 (ubuntu 러너에는 Docker가 있음)
       - name: Build and test
         run: ./gradlew build
+
+      - name: Docker 이미지 빌드 확인
+        run: docker build -t backend .
 
       - name: Upload test reports
         if: failure()

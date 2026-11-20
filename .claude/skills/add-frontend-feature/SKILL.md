@@ -14,6 +14,7 @@ Next.js 16은 이전 버전과 API가 다르다. 쓰려는 기능의 문서를 `
 - 오류 처리: `01-getting-started/10-error-handling.md`
 
 ## 1. API 클라이언트
+- 타입은 `src/lib/api/schema.d.ts`(생성 파일)의 `components["schemas"]`에서 가져온다. 스펙이 오래됐으면 백엔드에서 `./gradlew updateOpenApi`, 여기서 `npm run api:types`.
 - `src/lib/api/<기능>.ts`에 타입과 함수를 추가한다. 첫 줄은 `import "server-only";`.
 - 백엔드 주소는 `backendUrl()` 패턴(`await connection()` 후 `process.env.BACKEND_URL`)을 따른다.
 - `!res.ok`이면 Problem Details의 `detail`로 `ApiError`를 만든다. 공통 부분이 늘어나면 `src/lib/api/client.ts`로 분리한다.

@@ -46,5 +46,6 @@ cd backend && ./gradlew build
 `HexagonalArchitectureTest`가 실패하면 의존 방향을 고친다. 테스트를 바꿔서 통과시키지 않는다.
 
 ## 7. 마무리
+- API를 추가하거나 바꿨으면 `./gradlew updateOpenApi` 후 `frontend`에서 `npm run api:types`. 두 생성 파일을 같이 커밋한다.
 - `backend/README.md`의 샘플 API 목록을 갱신한다.
 - 화면이 필요하면 `add-frontend-feature`로 이어서 진행.
