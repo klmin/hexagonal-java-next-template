@@ -18,7 +18,13 @@ export default function Home() {
       </section>
 
       <section>
-        <Suspense fallback={<p className="text-sm text-zinc-500">불러오는 중...</p>}>
+        <Suspense
+          fallback={
+            <p role="status" className="text-sm text-zinc-500">
+              불러오는 중...
+            </p>
+          }
+        >
           <ItemList />
         </Suspense>
       </section>

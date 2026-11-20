@@ -4,8 +4,8 @@ test("항목을 추가하면 목록에 보인다", async ({ page }) => {
   const name = `e2e-${Date.now()}`;
 
   await page.goto("/");
-  await page.getByPlaceholder("이름").fill(name);
-  await page.getByPlaceholder("설명 (선택)").fill("playwright");
+  await page.getByLabel("이름").fill(name);
+  await page.getByLabel("설명 (선택)").fill("playwright");
   await page.getByRole("button", { name: "추가" }).click();
 
   await expect(page.getByText(name)).toBeVisible();
@@ -17,7 +17,7 @@ test("항목을 추가하면 목록에 보인다", async ({ page }) => {
 
 test("이름이 공백뿐이면 오류를 보여 준다", async ({ page }) => {
   await page.goto("/");
-  await page.getByPlaceholder("이름").fill("   ");
+  await page.getByLabel("이름").fill("   ");
   await page.getByRole("button", { name: "추가" }).click();
 
   // Next.js 라우트 안내 요소도 role=alert 라서 폼 안에서 찾는다
