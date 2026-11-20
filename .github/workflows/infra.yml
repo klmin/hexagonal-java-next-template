@@ -65,6 +65,42 @@ jobs:
             exit 1
           fi
 
+      # 앱과 같은 경로로 트레이스를 보내서(OTLP HTTP -> Alloy -> Tempo) 실제로 저장되고 조회되는지,
+      # Tempo metrics-generator 가 만든 span 메트릭이 Prometheus 에 들어오는지 본다
+      - name: 트레이스 송신, 조회 확인
+        run: |
+          trace_id=$(openssl rand -hex 16)
+          span_id=$(openssl rand -hex 8)
+          now=$(date +%s%N)
+          cat > /tmp/trace.json <<EOF
+          {"resourceSpans":[{"resource":{"attributes":[{"key":"service.name","value":{"stringValue":"infra-ci"}}]},
+            "scopeSpans":[{"spans":[{"traceId":"$trace_id","spanId":"$span_id","name":"GET /ci","kind":2,
+              "startTimeUnixNano":"$((now - 50000000))","endTimeUnixNano":"$now"}]}]}]}
+          EOF
+          curl -fsS -X POST -H 'Content-Type: application/json' --data @/tmp/trace.json http://localhost:4318/v1/traces
+          echo "trace_id=$trace_id"
+
+          for i in $(seq 1 30); do
+            # 응답의 spanId 는 base64 라서 span 이름으로 확인한다. trace_id 로 조회하므로 이번 실행의 트레이스다
+            if curl -fsS "http://localhost:3200/api/v2/traces/$trace_id" | grep -q '"GET /ci"'; then
+              echo "Tempo 에서 조회됨"
+              found=1
+              break
+            fi
+            sleep 2
+          done
+          [ -n "${found:-}" ] || { echo "Tempo 에서 트레이스를 찾지 못했습니다"; exit 1; }
+
+          for i in $(seq 1 45); do
+            if curl -fsS 'http://localhost:9090/api/v1/query' --data-urlencode 'query=traces_spanmetrics_calls_total{service="infra-ci"}' | grep -q '"value"'; then
+              echo "span 메트릭이 Prometheus 에 들어옴"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "span 메트릭이 Prometheus 에 들어오지 않았습니다"
+          exit 1
+
       - name: 모니터링 스택 로그 (실패 시)
         if: failure()
         working-directory: infra/observability
