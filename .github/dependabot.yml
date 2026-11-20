@@ -31,3 +31,17 @@ updates:
     directory: /
     schedule:
       interval: weekly
+
+  # Dockerfile, compose 이미지 태그 (postgres, eclipse-temurin, node, 모니터링 스택)
+  - package-ecosystem: docker
+    directories: ['/backend', '/frontend']
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker-compose
+    directories: ['/', '/backend', '/infra/observability']
+    schedule:
+      interval: weekly
+    groups:
+      observability:
+        patterns: ['grafana/*', 'prom/*']
