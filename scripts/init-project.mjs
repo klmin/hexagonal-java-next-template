@@ -11,6 +11,7 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 
 const OLD_PACKAGE = "com.example.template";
@@ -44,7 +45,7 @@ if (!/^[A-Za-z0-9-]+$/.test(values.owner)) {
   process.exit(1);
 }
 
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1")), "..");
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const newPackage = values.package;
 const newGroup = newPackage.split(".").slice(0, -1).join(".");
 const dryRun = values["dry-run"];
@@ -70,7 +71,40 @@ function rewrite(file, replacements) {
   }
 }
 
-// 1. 내용 치환
+function fail(message) {
+  console.error(message);
+  process.exit(1);
+}
+
+// child 가 parent 의 하위 경로인지 (같은 경로는 아님)
+function isInside(child, parent) {
+  const rel = path.relative(parent, child);
+  return rel !== "" && !rel.startsWith("..") && !path.isAbsolute(rel);
+}
+
+// 1. 패키지 폴더 이동 계획. 파일을 고치기 전에 검증해서 중간에 실패하지 않게 한다.
+if (newPackage === OLD_PACKAGE) fail(`--package 가 기존 패키지(${OLD_PACKAGE})와 같습니다.`);
+const moves = [];
+for (const sourceSet of ["main", "test"]) {
+  const javaDir = path.join(root, "backend", "src", sourceSet, "java");
+  const from = path.join(javaDir, ...OLD_PACKAGE.split("."));
+  const to = path.join(javaDir, ...newPackage.split("."));
+  if (!fs.existsSync(from)) continue;
+  if (isInside(from, to)) {
+    // 새 패키지가 기존 패키지의 상위 (예: com.example). from 을 빼면 to 가 비어야 한다.
+    for (let dir = from; dir !== to; dir = path.dirname(dir)) {
+      if (fs.readdirSync(path.dirname(dir)).length !== 1) {
+        fail(`${path.relative(root, to)} 에 다른 파일이 있어 패키지를 옮길 수 없습니다.`);
+      }
+    }
+  } else if (!isInside(to, from) && fs.existsSync(to)) {
+    // 새 패키지가 기존 패키지의 하위 (예: com.example.template.shop)면 임시 폴더를 거쳐 옮기니 괜찮다.
+    fail(`${path.relative(root, to)} 가 이미 있습니다.`);
+  }
+  moves.push({ javaDir, from, to });
+}
+
+// 2. 내용 치환
 for (const file of trackedFiles()) {
   const base = path.basename(file);
   if (!TEXT.test(base) || SKIP.some((re) => re.test(file))) continue;
@@ -89,22 +123,23 @@ for (const file of trackedFiles()) {
   rewrite(file, replacements);
 }
 
-// 2. 패키지 폴더 이동
-for (const sourceSet of ["main", "test"]) {
-  const javaDir = path.join(root, "backend", "src", sourceSet, "java");
-  const from = path.join(javaDir, ...OLD_PACKAGE.split("."));
-  const to = path.join(javaDir, ...newPackage.split("."));
-  if (!fs.existsSync(from)) continue;
-  console.log(`move ${path.relative(root, from)} -> ${path.relative(root, to)}`);
-  if (dryRun) continue;
-  fs.mkdirSync(path.dirname(to), { recursive: true });
-  fs.renameSync(from, to);
-  // 비게 된 상위 폴더 정리 (com/example)
-  let dir = path.dirname(from);
-  while (dir !== javaDir && fs.readdirSync(dir).length === 0) {
+// 3. 패키지 폴더 이동
+// 새 패키지가 기존 패키지의 상위/하위일 수 있어서 임시 폴더로 뺐다가 옮긴다.
+function removeEmptyParents(dir, stop) {
+  while (dir !== stop && fs.existsSync(dir) && fs.readdirSync(dir).length === 0) {
     fs.rmdirSync(dir);
     dir = path.dirname(dir);
   }
+}
+
+for (const { javaDir, from, to } of moves) {
+  console.log(`move ${path.relative(root, from)} -> ${path.relative(root, to)}`);
+  if (dryRun) continue;
+  const tmp = path.join(javaDir, `.init-project-${process.pid}`);
+  fs.renameSync(from, tmp);
+  removeEmptyParents(path.dirname(from), javaDir); // 비게 된 상위 폴더 정리 (com/example)
+  fs.mkdirSync(path.dirname(to), { recursive: true });
+  fs.renameSync(tmp, to);
 }
 
 console.log(`\n${dryRun ? "[dry-run] " : ""}${changed.length}개 파일 수정`);
