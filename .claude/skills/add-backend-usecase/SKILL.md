@@ -29,6 +29,7 @@ description: 백엔드에 새 기능(유스케이스)을 기능별 패키지 + �
 ## 4. adapter.out.persistence (`<feature>/adapter/out/persistence/`)
 - `...JpaEntity`, `...JpaRepository`, `...PersistenceAdapter`(포트 구현). 전부 package-private.
 - 엔티티와 도메인 변환은 어댑터 안에서만.
+- 검색, 통계처럼 조회가 복잡하면 jOOQ 어댑터로 따로 만든다 (`ItemSearchAdapter` 참고, 테스트는 `@JooqTest`). 생성 코드는 마이그레이션 추가 후 빌드하면 갱신된다.
 - `db/migration/V{다음번호}__설명.sql` 추가. 기존 파일은 수정하지 않는다.
 - 테스트: `@DataJpaTest` + `@AutoConfigureTestDatabase(replace = NONE)` + `@Import({TestcontainersConfiguration.class, 어댑터.class})` + `@Testcontainers(disabledWithoutDocker = true)`.
 
