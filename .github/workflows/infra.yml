@@ -91,6 +91,20 @@ jobs:
           done
           [ -n "${found:-}" ] || { echo "Tempo 에서 트레이스를 찾지 못했습니다"; exit 1; }
 
+          # Grafana 트레이스 검색 화면이 쓰는 TraceQL 검색
+          for i in $(seq 1 30); do
+            if curl -fsS -G 'http://localhost:3200/api/search' \
+                --data-urlencode 'q={ resource.service.name = "infra-ci" }' \
+                --data-urlencode "start=$(( $(date +%s) - 600 ))" --data-urlencode "end=$(date +%s)" \
+                | grep -q "$trace_id"; then
+              echo "TraceQL 검색됨"
+              searched=1
+              break
+            fi
+            sleep 2
+          done
+          [ -n "${searched:-}" ] || { echo "TraceQL 검색으로 트레이스를 찾지 못했습니다"; exit 1; }
+
           for i in $(seq 1 45); do
             if curl -fsS 'http://localhost:9090/api/v1/query' --data-urlencode 'query=traces_spanmetrics_calls_total{service="infra-ci"}' | grep -q '"value"'; then
               echo "span 메트릭이 Prometheus 에 들어옴"
