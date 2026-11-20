@@ -5,6 +5,7 @@
 ## 구성
 
 - `backend/` - Spring Boot 4.1, Java 25, Gradle(Kotlin DSL), PostgreSQL, Flyway ([README](backend/README.md))
+- `infra/observability/` - 로컬 모니터링 스택 ([README](infra/observability/README.md))
 - `frontend/` - Next.js 16 (App Router, Cache Components), React 19, TypeScript, Tailwind 4 ([README](frontend/README.md), [AGENTS](frontend/AGENTS.md))
 
 ## 명령
@@ -54,6 +55,7 @@ common/jooq/                         jOOQ 생성 코드 (빌드 시 생성, 커�
 - 도메인 규칙 위반은 `DomainValidationException`(400), 없는 리소스는 `NotFoundException`을 상속한 기능 예외(404)
 - 저장/수정은 JPA, 검색/통계 같은 조회는 jOOQ. jOOQ 코드는 Flyway 마이그레이션으로 빌드 때 생성되니 직접 고치지 않는다
 - 스키마 변경은 Flyway `V{n}__설명.sql`로만. 머지된 마이그레이션은 고치지 않는다
+- 로그는 SLF4J로 남긴다. traceId는 자동으로 붙으니 직접 넣지 않는다. 개인정보, 비밀값은 로그에 남기지 않는다
 - 현재 시각은 `Clock` Bean 주입 (`Instant.now()` 직접 호출 X)
 
 ### 테스트

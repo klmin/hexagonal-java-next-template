@@ -68,6 +68,14 @@ jOOQ 코드는 커밋하지 않고 빌드할 때 만든다.
 마이그레이션을 추가한 직후 첫 빌드에는 Docker가 필요하다. 직접 돌릴 때는 `./gradlew generateJooq`.
 생성 로직은 `src/jooqCodegen/java/codegen/JooqCodegen.java`.
 
+## 모니터링
+
+- 메트릭: 관리 포트(기본 8081)의 `/actuator/prometheus`
+- 트레이스: `OTLP_TRACING_ENABLED=true`면 OTLP로 전송
+- 로그: `LOG_FILE`을 주면 JSON 파일로 남김 (traceId 포함)
+
+스택 띄우는 법과 변수는 [infra/observability](../infra/observability/README.md).
+
 ## 샘플 API
 
 - `POST /api/items` - 생성 (201, Location 헤더)
