@@ -1,5 +1,6 @@
 package com.example.template.item.application.port.in;
 
+import com.example.template.common.error.DomainValidationException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,8 +16,8 @@ class SearchItemsQueryTest {
 
     @Test
     void rejectsInvalidPaging() {
-        assertThatThrownBy(() -> new SearchItemsQuery(null, -1, 20)).isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> new SearchItemsQuery(null, 0, 0)).isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> new SearchItemsQuery(null, 0, 101)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new SearchItemsQuery(null, -1, 20)).isInstanceOf(DomainValidationException.class);
+        assertThatThrownBy(() -> new SearchItemsQuery(null, 0, 0)).isInstanceOf(DomainValidationException.class);
+        assertThatThrownBy(() -> new SearchItemsQuery(null, 0, 101)).isInstanceOf(DomainValidationException.class);
     }
 }

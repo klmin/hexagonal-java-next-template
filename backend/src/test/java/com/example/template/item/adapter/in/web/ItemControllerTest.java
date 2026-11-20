@@ -1,5 +1,6 @@
 package com.example.template.item.adapter.in.web;
 
+import com.example.template.common.error.DomainValidationException;
 import com.example.template.item.application.ItemNotFoundException;
 import com.example.template.item.application.port.in.CreateItemCommand;
 import com.example.template.item.application.port.in.CreateItemUseCase;
@@ -103,6 +104,50 @@ class ItemControllerTest {
     @Test
     void searchRejectsTooLargePageSize() throws Exception {
         mockMvc.perform(get("/api/items/search").param("size", "101"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_PROBLEM_JSON_VALUE))
+                .andExpect(jsonPath("$.detail").value("입력값을 확인해 주세요."))
+                .andExpect(jsonPath("$.errors[0].field").value("size"));
+    }
+
+    @Test
+    void createReturns400WhenDomainRuleViolated() throws Exception {
+        given(createItemUseCase.create(any(CreateItemCommand.class)))
+                .willThrow(new DomainValidationException("이미 있는 이름입니다."));
+
+        mockMvc.perform(post("/api/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name": "노트북"}
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_PROBLEM_JSON_VALUE))
+                .andExpect(jsonPath("$.detail").value("이미 있는 이름입니다."));
+    }
+
+    @Test
+    void createRejectsMalformedJson() throws Exception {
+        mockMvc.perform(post("/api/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\": "))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_PROBLEM_JSON_VALUE));
+    }
+
+    @Test
+    void getRejectsNonNumericId() throws Exception {
+        mockMvc.perform(get("/api/items/abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_PROBLEM_JSON_VALUE));
+    }
+
+    @Test
+    void unexpectedErrorReturns500ProblemWithoutInternalMessage() throws Exception {
+        given(getItemUseCase.getItems()).willThrow(new IllegalStateException("db password=secret"));
+
+        mockMvc.perform(get("/api/items"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_PROBLEM_JSON_VALUE))
+                .andExpect(jsonPath("$.detail").value("서버 오류가 발생했습니다."));
     }
 }

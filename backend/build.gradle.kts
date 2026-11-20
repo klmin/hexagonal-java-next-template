@@ -57,6 +57,7 @@ dependencies {
 // 마이그레이션 파일이 바뀔 때만 다시 실행된다.
 val migrationDir = layout.projectDirectory.dir("src/main/resources/db/migration")
 val jooqOutputDir = layout.buildDirectory.dir("generated-sources/jooq")
+val jooqPackage = "com.example.template.common.jooq"
 
 val generateJooq = tasks.register<JavaExec>("generateJooq") {
     group = "build"
@@ -67,15 +68,21 @@ val generateJooq = tasks.register<JavaExec>("generateJooq") {
     jvmArgs("-Dstdout.encoding=UTF-8", "-Dstderr.encoding=UTF-8")
     inputs.dir(migrationDir).withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.files(jooqCodegen.runtimeClasspath).withNormalizer(ClasspathNormalizer::class)
+    // 패키지를 바꾸면(scripts/init-project.mjs) 다시 생성되게 입력으로 등록한다
+    inputs.property("jooqPackage", jooqPackage)
     outputs.dir(jooqOutputDir)
     outputs.cacheIf { true }
     argumentProviders.add(CommandLineArgumentProvider {
         listOf(
             migrationDir.asFile.absolutePath,
             jooqOutputDir.get().asFile.absolutePath,
-            "com.example.template.common.jooq",
+            jooqPackage,
         )
     })
+    // 이전 패키지로 생성된 코드가 남아 같이 컴파일되지 않게 비우고 생성한다
+    doFirst {
+        jooqOutputDir.get().asFile.deleteRecursively()
+    }
 }
 
 sourceSets.main {
@@ -113,6 +120,23 @@ tasks.register<Test>("updateOpenApi") {
     filter.includeTestsMatching("*OpenApiSpecTests")
     systemProperty("openapi.update", "true")
     outputs.upToDateWhen { false }
+    // Docker가 없으면 테스트가 skip되어 스펙을 갱신하지 못한 채 성공으로 끝나므로 실패시킨다
+    var updated = false
+    addTestListener(object : TestListener {
+        override fun beforeSuite(suite: TestDescriptor) {}
+        override fun beforeTest(testDescriptor: TestDescriptor) {}
+        override fun afterTest(testDescriptor: TestDescriptor, result: TestResult) {}
+        override fun afterSuite(suite: TestDescriptor, result: TestResult) {
+            if (suite.parent == null) {
+                updated = result.successfulTestCount > 0
+            }
+        }
+    })
+    doLast {
+        if (!updated) {
+            throw GradleException("openapi/openapi.json 을 갱신하지 못했습니다. Docker를 실행한 뒤 다시 실행하세요.")
+        }
+    }
 }
 
 // Docker 이미지에는 실행 jar(bootJar) 하나만 쓴다
