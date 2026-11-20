@@ -18,7 +18,7 @@ repositories {
 }
 
 // jOOQ 코드 생성 전용 소스셋 (src/jooqCodegen). 앱에는 포함되지 않는다.
-val jooqCodegen: SourceSet by sourceSets.creating
+val jooqCodegen = sourceSets.create("jooqCodegen")
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -58,11 +58,13 @@ dependencies {
 val migrationDir = layout.projectDirectory.dir("src/main/resources/db/migration")
 val jooqOutputDir = layout.buildDirectory.dir("generated-sources/jooq")
 
-val generateJooq by tasks.registering(JavaExec::class) {
+val generateJooq = tasks.register<JavaExec>("generateJooq") {
     group = "build"
     description = "Flyway 마이그레이션으로 jOOQ 코드를 생성한다 (Docker 필요)"
     classpath = jooqCodegen.runtimeClasspath
     mainClass = "codegen.JooqCodegen"
+    // 안내 메시지(한글)가 Windows 기본 인코딩(MS949)으로 나와 Gradle 출력에서 깨지지 않게
+    jvmArgs("-Dstdout.encoding=UTF-8", "-Dstderr.encoding=UTF-8")
     inputs.dir(migrationDir).withPathSensitivity(PathSensitivity.RELATIVE)
     inputs.files(jooqCodegen.runtimeClasspath).withNormalizer(ClasspathNormalizer::class)
     outputs.dir(jooqOutputDir)
@@ -103,7 +105,7 @@ tasks.withType<Test> {
 }
 
 // openapi/openapi.json(API 계약)을 현재 코드 기준으로 다시 쓴다 (Docker 필요)
-val updateOpenApi by tasks.registering(Test::class) {
+tasks.register<Test>("updateOpenApi") {
     group = "documentation"
     description = "openapi/openapi.json 을 현재 API로 갱신한다"
     testClassesDirs = sourceSets.test.get().output.classesDirs

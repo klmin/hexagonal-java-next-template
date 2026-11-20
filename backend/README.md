@@ -35,7 +35,8 @@ com.example.template
 ./gradlew build         # 테스트 + ArchUnit 포함
 ```
 
-Docker가 꺼져 있으면 DB가 필요한 테스트는 skip된다. CI에서는 항상 돈다.
+빌드에는 Docker가 필요하다. jOOQ 코드를 만들 때 임시 PostgreSQL 컨테이너를 쓰기 때문이다([JPA와 jOOQ](#jpa와-jooq)).
+jOOQ 코드가 이미 생성돼 있으면 Docker가 꺼져 있어도 빌드되고, DB가 필요한 테스트만 skip된다. CI에서는 항상 돈다.
 
 ## DB 설정
 
@@ -65,7 +66,7 @@ jOOQ 코드는 커밋하지 않고 빌드할 때 만든다.
 3. 그 스키마로 `build/generated-sources/jooq`에 코드를 생성한다 (패키지 `com.example.template.common.jooq`).
 
 `compileJava` 전에 자동으로 돌고, 마이그레이션 파일이 바뀌지 않으면 건너뛴다.
-마이그레이션을 추가한 직후 첫 빌드에는 Docker가 필요하다. 직접 돌릴 때는 `./gradlew generateJooq`.
+처음 빌드할 때, 마이그레이션을 추가한 직후, `clean` 뒤에는 Docker가 필요하다. 직접 돌릴 때는 `./gradlew generateJooq`.
 생성 로직은 `src/jooqCodegen/java/codegen/JooqCodegen.java`.
 
 ## 모니터링

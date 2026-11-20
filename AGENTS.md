@@ -21,7 +21,8 @@ npm run format:check && npm run lint && npm run typecheck && npm test && npm run
 ```
 
 작업을 끝내기 전에 바뀐 쪽의 명령을 돌려서 통과시킨다.
-Docker가 없으면 Testcontainers 테스트는 skip되고 CI에서만 돈다.
+백엔드 빌드는 jOOQ 코드 생성(`generateJooq`)에 Docker가 필요하다. 처음 빌드할 때, 마이그레이션을 바꾼 뒤, `clean` 뒤에는 Docker 없이 빌드할 수 없다.
+코드가 이미 생성돼 있으면 Docker 없이도 빌드되고, Testcontainers 테스트만 skip되어 CI에서만 돈다.
 
 ## 백엔드 구조 (기능별 패키지 + 헥사고날)
 
