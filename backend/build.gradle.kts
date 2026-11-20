@@ -29,6 +29,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.flywaydb:flyway-database-postgresql")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0")
     developmentOnly("org.springframework.boot:spring-boot-docker-compose")
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
@@ -99,4 +100,20 @@ tasks.withType<Test> {
             }
         }
     })
+}
+
+// openapi/openapi.json(API 계약)을 현재 코드 기준으로 다시 쓴다 (Docker 필요)
+val updateOpenApi by tasks.registering(Test::class) {
+    group = "documentation"
+    description = "openapi/openapi.json 을 현재 API로 갱신한다"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    filter.includeTestsMatching("*OpenApiSpecTests")
+    systemProperty("openapi.update", "true")
+    outputs.upToDateWhen { false }
+}
+
+// Docker 이미지에는 실행 jar(bootJar) 하나만 쓴다
+tasks.jar {
+    enabled = false
 }

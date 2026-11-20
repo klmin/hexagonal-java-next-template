@@ -76,6 +76,28 @@ jOOQ 코드는 커밋하지 않고 빌드할 때 만든다.
 
 스택 띄우는 법과 변수는 [infra/observability](../infra/observability/README.md).
 
+## API 문서
+
+- Swagger UI: http://localhost:8080/swagger-ui.html
+- 스펙: http://localhost:8080/v3/api-docs (운영에서 끄려면 `API_DOCS_ENABLED=false`)
+
+`openapi/openapi.json`(저장소 루트)은 프론트 타입 생성에 쓰는 API 계약 파일이다.
+API를 바꾸면 `./gradlew updateOpenApi`로 갱신해서 같이 커밋한다. 갱신하지 않으면 `OpenApiSpecTests`가 실패한다.
+
+## Docker
+
+jOOQ 코드 생성에 Docker가 필요해서 jar는 이미지 밖에서 만든다.
+
+```bash
+./gradlew bootJar
+docker build -t backend .
+docker run -p 8080:8080 \
+  -e SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:5432/<db> \
+  -e SPRING_DATASOURCE_USERNAME=<user> \
+  -e SPRING_DATASOURCE_PASSWORD=<password> \
+  backend
+```
+
 ## 샘플 API
 
 - `POST /api/items` - 생성 (201, Location 헤더)

@@ -5,10 +5,12 @@ on:
     branches: [main]
     paths:
       - 'frontend/**'
+      - 'openapi/**'
       - '.github/workflows/frontend.yml'
   pull_request:
     paths:
       - 'frontend/**'
+      - 'openapi/**'
       - '.github/workflows/frontend.yml'
 
 permissions:
@@ -34,6 +36,15 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - run: npm ci
+
+      - name: API 타입이 openapi.json 과 같은지 확인
+        run: |
+          npm run api:types
+          git diff --exit-code src/lib/api/schema.d.ts || (echo "openapi.json 이 바뀌었습니다. frontend 에서 npm run api:types 후 커밋하세요." && exit 1)
+
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
+
+      - name: Docker 이미지 빌드 확인
+        run: docker build -t frontend .

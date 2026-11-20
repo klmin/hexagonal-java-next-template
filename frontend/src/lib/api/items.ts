@@ -2,17 +2,11 @@ import "server-only";
 
 import { connection } from "next/server";
 
-export type Item = {
-  id: number;
-  name: string;
-  description: string | null;
-  createdAt: string;
-};
+import type { components } from "./schema";
 
-export type CreateItemInput = {
-  name: string;
-  description?: string;
-};
+// 백엔드 openapi/openapi.json 에서 생성한 타입 (npm run api:types)
+export type Item = components["schemas"]["ItemResponse"];
+export type CreateItemInput = components["schemas"]["CreateItemRequest"];
 
 type ProblemDetail = {
   title?: string;

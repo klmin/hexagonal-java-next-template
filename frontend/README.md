@@ -18,6 +18,25 @@ npm run dev
 - `npm run build` - 프로덕션 빌드
 - `npm run lint` - ESLint (Next 16부터 `next lint` 없음)
 - `npm run typecheck` - `next typegen && tsc --noEmit`
+- `npm run api:types` - `../openapi/openapi.json`에서 `src/lib/api/schema.d.ts` 생성
+
+## API 타입
+
+백엔드 API 타입은 손으로 쓰지 않고 OpenAPI 스펙에서 생성한다.
+백엔드에서 `./gradlew updateOpenApi`로 스펙이 바뀌면 여기서 `npm run api:types`를 돌리고 같이 커밋한다.
+CI가 생성 결과와 커밋된 파일이 다르면 실패시킨다.
+
+```ts
+import type { components } from "./schema";
+type Item = components["schemas"]["ItemResponse"];
+```
+
+## Docker
+
+```bash
+docker build -t frontend .
+docker run -p 3000:3000 -e BACKEND_URL=http://<backend>:8080 frontend
+```
 
 ## 구조
 
