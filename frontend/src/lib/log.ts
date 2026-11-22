@@ -4,5 +4,5 @@ import "server-only";
 // 줄바꿈을 지워 로그 한 줄을 위조하지 못하게 한다 (log injection)
 export function logError(context: string, error: unknown): void {
   const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
-  console.error(`${context}: ${message.replace(/[\r\n]+/g, " ")}`);
+  console.error(`${context}: ${message.replace(/\n|\r/g, "")}`);
 }

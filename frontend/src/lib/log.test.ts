@@ -13,7 +13,7 @@ describe("logError", () => {
     logError("deleteItemAction failed", new Error("invalid item id: 1\nINFO fake log line"));
 
     expect(spy).toHaveBeenCalledWith(
-      "deleteItemAction failed: Error: invalid item id: 1 INFO fake log line",
+      "deleteItemAction failed: Error: invalid item id: 1INFO fake log line",
     );
   });
 });
