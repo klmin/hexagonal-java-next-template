@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { CreateItemForm } from "./items/create-item-form";
 import { ItemList } from "./items/item-list";
 
-export default function Home() {
+export default function Home({ searchParams }: PageProps<"/">) {
   return (
     <main className="mx-auto flex w-full max-w-xl flex-col gap-8 px-4 py-12">
       <header>
@@ -25,7 +25,8 @@ export default function Home() {
             </p>
           }
         >
-          <ItemList />
+          {/* searchParams 는 요청 시점 데이터라 Suspense 안의 ItemList 에서 await 한다 */}
+          <ItemList searchParams={searchParams} />
         </Suspense>
       </section>
     </main>

@@ -43,14 +43,6 @@ class ItemPersistenceAdapterTest {
     }
 
     @Test
-    void findAllReturnsNewestFirst() {
-        Item first = adapter.save(Item.create("a", null, NOW));
-        Item second = adapter.save(Item.create("b", null, NOW));
-
-        assertThat(adapter.findAll()).extracting(Item::id).containsExactly(second.id(), first.id());
-    }
-
-    @Test
     void updateIsFlushedByDirtyCheckingWithoutSave() {
         Item saved = adapter.save(Item.create("노트북", "업무용", NOW));
         em.flush();

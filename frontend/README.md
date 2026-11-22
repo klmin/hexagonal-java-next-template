@@ -39,6 +39,7 @@ docker compose up -d --build --wait
 # frontend
 npx playwright install chromium   # 처음 한 번
 npm run test:e2e                  # 기본 대상 http://localhost:3000 (E2E_BASE_URL로 변경)
+                                  # 테스트 데이터를 API로 만드는 테스트는 http://localhost:8080 (E2E_API_URL)
 ```
 
 CI(`.github/workflows/e2e.yml`)도 같은 방식으로 돈다.
@@ -71,9 +72,9 @@ src/
 │   ├── not-found.tsx
 │   ├── loading.tsx
 │   └── items/
-│       ├── actions.ts           # Server Action (생성/삭제 후 refresh, 수정 후 redirect)
+│       ├── actions.ts           # Server Action (생성/수정 후 첫 페이지로 redirect, 삭제 후 refresh)
 │       ├── create-item-form.tsx # 폼 (useActionState)
-│       ├── item-list.tsx        # 서버 컴포넌트, 요청마다 조회, 수정 링크/삭제 버튼
+│       ├── item-list.tsx        # 서버 컴포넌트, 커서 페이징(?cursor=), 수정 링크/삭제 버튼
 │       └── [id]/edit/
 │           ├── page.tsx         # 동적 경로. params 를 Suspense 안에서 await
 │           └── edit-item-form.tsx

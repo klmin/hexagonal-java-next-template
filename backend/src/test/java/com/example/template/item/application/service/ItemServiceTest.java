@@ -43,14 +43,6 @@ class ItemServiceTest {
     }
 
     @Test
-    void getItemsReturnsAll() {
-        service.create(new CreateItemCommand("a", null));
-        service.create(new CreateItemCommand("b", null));
-
-        assertThat(service.getItems()).hasSize(2);
-    }
-
-    @Test
     void updateChangesStoredItem() {
         Item created = service.create(new CreateItemCommand("노트북", "업무용"));
 
@@ -95,11 +87,6 @@ class ItemServiceTest {
         @Override
         public Optional<Item> findById(long id) {
             return items.stream().filter(item -> item.id() == id).findFirst();
-        }
-
-        @Override
-        public List<Item> findAll() {
-            return List.copyOf(items);
         }
 
         @Override

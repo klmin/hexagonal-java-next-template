@@ -3,6 +3,8 @@ package com.example.template.item.adapter.in.web;
 import com.example.template.item.application.port.in.CreateItemUseCase;
 import com.example.template.item.application.port.in.DeleteItemUseCase;
 import com.example.template.item.application.port.in.GetItemUseCase;
+import com.example.template.item.application.port.in.ListItemsQuery;
+import com.example.template.item.application.port.in.ListItemsUseCase;
 import com.example.template.item.application.port.in.SearchItemsQuery;
 import com.example.template.item.application.port.in.SearchItemsUseCase;
 import com.example.template.item.application.port.in.UpdateItemUseCase;
@@ -25,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/items")
@@ -36,15 +37,17 @@ public class ItemController {
     private final SearchItemsUseCase searchItemsUseCase;
     private final UpdateItemUseCase updateItemUseCase;
     private final DeleteItemUseCase deleteItemUseCase;
+    private final ListItemsUseCase listItemsUseCase;
 
     public ItemController(CreateItemUseCase createItemUseCase, GetItemUseCase getItemUseCase,
                           SearchItemsUseCase searchItemsUseCase, UpdateItemUseCase updateItemUseCase,
-                          DeleteItemUseCase deleteItemUseCase) {
+                          DeleteItemUseCase deleteItemUseCase, ListItemsUseCase listItemsUseCase) {
         this.createItemUseCase = createItemUseCase;
         this.getItemUseCase = getItemUseCase;
         this.searchItemsUseCase = searchItemsUseCase;
         this.updateItemUseCase = updateItemUseCase;
         this.deleteItemUseCase = deleteItemUseCase;
+        this.listItemsUseCase = listItemsUseCase;
     }
 
     @PostMapping
@@ -74,9 +77,12 @@ public class ItemController {
         deleteItemUseCase.delete(id);
     }
 
+    // 커서 페이징. 첫 페이지는 cursor 없이, 다음 페이지는 응답의 nextCursor 를 그대로 넘긴다
     @GetMapping
-    public List<ItemResponse> list() {
-        return getItemUseCase.getItems().stream().map(ItemResponse::from).toList();
+    public ItemListResponse list(
+            @RequestParam(required = false) String cursor,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(ListItemsQuery.MAX_SIZE) int size) {
+        return ItemListResponse.from(listItemsUseCase.list(new ListItemsQuery(ItemCursor.decode(cursor), size)));
     }
 
     @GetMapping("/search")

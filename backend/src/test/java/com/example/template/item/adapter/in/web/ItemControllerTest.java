@@ -6,7 +6,10 @@ import com.example.template.item.application.port.in.CreateItemCommand;
 import com.example.template.item.application.port.in.CreateItemUseCase;
 import com.example.template.item.application.port.in.DeleteItemUseCase;
 import com.example.template.item.application.port.in.GetItemUseCase;
+import com.example.template.item.application.port.in.ItemListResult;
 import com.example.template.item.application.port.in.ItemSearchResult;
+import com.example.template.item.application.port.in.ListItemsQuery;
+import com.example.template.item.application.port.in.ListItemsUseCase;
 import com.example.template.item.application.port.in.SearchItemsQuery;
 import com.example.template.item.application.port.in.SearchItemsUseCase;
 import com.example.template.item.application.port.in.UpdateItemCommand;
@@ -57,6 +60,9 @@ class ItemControllerTest {
     @MockitoBean
     private DeleteItemUseCase deleteItemUseCase;
 
+    @MockitoBean
+    private ListItemsUseCase listItemsUseCase;
+
     @Test
     void createReturns201WithLocation() throws Exception {
         given(createItemUseCase.create(any(CreateItemCommand.class)))
@@ -95,12 +101,32 @@ class ItemControllerTest {
     }
 
     @Test
-    void listReturnsItems() throws Exception {
-        given(getItemUseCase.getItems()).willReturn(List.of(Item.restore(1L, "a", null, NOW)));
+    void listReturnsFirstPageWithOpaqueNextCursor() throws Exception {
+        given(listItemsUseCase.list(new ListItemsQuery(null, 20)))
+                .willReturn(new ItemListResult(List.of(Item.restore(7L, "a", null, NOW)), 7L));
 
         mockMvc.perform(get("/api/items"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("a"));
+                .andExpect(jsonPath("$.items[0].name").value("a"))
+                .andExpect(jsonPath("$.nextCursor").value(ItemCursor.encode(7L)));
+    }
+
+    @Test
+    void listPassesDecodedCursor() throws Exception {
+        given(listItemsUseCase.list(new ListItemsQuery(7L, 2)))
+                .willReturn(new ItemListResult(List.of(), null));
+
+        mockMvc.perform(get("/api/items").param("cursor", ItemCursor.encode(7L)).param("size", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nextCursor").doesNotExist());
+    }
+
+    @Test
+    void listRejectsInvalidCursorAndSize() throws Exception {
+        mockMvc.perform(get("/api/items").param("cursor", "not-a-cursor!"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(get("/api/items").param("size", "101"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -156,7 +182,7 @@ class ItemControllerTest {
 
     @Test
     void unexpectedErrorReturns500ProblemWithoutInternalMessage() throws Exception {
-        given(getItemUseCase.getItems()).willThrow(new IllegalStateException("db password=secret"));
+        given(listItemsUseCase.list(any(ListItemsQuery.class))).willThrow(new IllegalStateException("db password=secret"));
 
         mockMvc.perform(get("/api/items"))
                 .andExpect(status().isInternalServerError())

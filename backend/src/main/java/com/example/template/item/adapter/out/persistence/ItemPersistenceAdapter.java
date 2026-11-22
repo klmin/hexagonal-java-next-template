@@ -5,10 +5,8 @@ import com.example.template.item.application.port.out.LoadItemPort;
 import com.example.template.item.application.port.out.SaveItemPort;
 import com.example.template.item.application.port.out.UpdateItemPort;
 import com.example.template.item.domain.Item;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -47,13 +45,6 @@ class ItemPersistenceAdapter implements SaveItemPort, LoadItemPort, UpdateItemPo
     @Override
     public Optional<Item> findById(long id) {
         return repository.findById(id).map(ItemPersistenceAdapter::toDomain);
-    }
-
-    @Override
-    public List<Item> findAll() {
-        return repository.findAll(Sort.by(Sort.Direction.DESC, "id")).stream()
-                .map(ItemPersistenceAdapter::toDomain)
-                .toList();
     }
 
     private static ItemJpaEntity toEntity(Item item) {
