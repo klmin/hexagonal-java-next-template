@@ -5,6 +5,7 @@ import com.example.template.item.domain.Item;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.context.annotation.Import;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -25,6 +26,9 @@ class ItemPersistenceAdapterTest {
     @Autowired
     private ItemPersistenceAdapter adapter;
 
+    @Autowired
+    private TestEntityManager em;
+
     @Test
     void saveAndFindById() {
         Item saved = adapter.save(Item.create("노트북", "업무용", NOW));
@@ -44,5 +48,32 @@ class ItemPersistenceAdapterTest {
         Item second = adapter.save(Item.create("b", null, NOW));
 
         assertThat(adapter.findAll()).extracting(Item::id).containsExactly(second.id(), first.id());
+    }
+
+    @Test
+    void updateIsFlushedByDirtyCheckingWithoutSave() {
+        Item saved = adapter.save(Item.create("노트북", "업무용", NOW));
+        em.flush();
+        em.clear();
+
+        adapter.update(adapter.findById(saved.id()).orElseThrow().update("데스크톱", null));
+        em.flush();
+        em.clear();
+
+        assertThat(adapter.findById(saved.id()))
+                .hasValueSatisfying(found -> {
+                    assertThat(found.name()).isEqualTo("데스크톱");
+                    assertThat(found.description()).isNull();
+                    assertThat(found.createdAt()).isEqualTo(NOW);
+                });
+    }
+
+    @Test
+    void deleteByIdReportsWhetherItExisted() {
+        Item saved = adapter.save(Item.create("노트북", null, NOW));
+
+        assertThat(adapter.deleteById(saved.id())).isTrue();
+        assertThat(adapter.deleteById(saved.id())).isFalse();
+        assertThat(adapter.findById(saved.id())).isEmpty();
     }
 }

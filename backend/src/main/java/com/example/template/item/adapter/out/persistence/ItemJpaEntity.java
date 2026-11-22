@@ -36,6 +36,11 @@ class ItemJpaEntity {
         this.createdAt = createdAt;
     }
 
+    void update(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
+
     Long getId() {
         return id;
     }

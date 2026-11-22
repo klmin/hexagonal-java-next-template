@@ -56,6 +56,19 @@ SPRING_DATASOURCE_PASSWORD=<password>
 
 스키마는 Flyway(`src/main/resources/db/migration`)로만 바꾼다. `ddl-auto`는 `validate`.
 
+## 도메인 모델과 JPA 엔티티
+
+도메인 모델(`Item`)과 JPA 엔티티(`ItemJpaEntity`)를 나눈다. 도메인은 JPA를 모르고, 변환은 영속성 어댑터에서만 한다.
+
+수정은 이렇게 흐른다 (`ItemService.update`, `ItemPersistenceAdapter.update`).
+
+1. 서비스(트랜잭션 안)가 포트로 도메인 모델을 조회한다
+2. 도메인 메서드(`Item.update`)로 바꾼다. 검증은 도메인이 한다
+3. `UpdateItemPort.update`로 넘기면 어댑터가 영속 상태의 엔티티에 값을 옮긴다
+4. `save()` 없이 커밋 때 더티 체킹으로 UPDATE 된다. 엔티티는 1차 캐시에 있어서 SELECT가 다시 나가지 않는다
+
+도메인 객체를 바꾸는 것만으로는 저장되지 않는다. 엔티티로 옮기는 3번이 꼭 필요하다.
+
 ## JPA와 jOOQ
 
 - 저장/수정(도메인 모델 단위)은 JPA, 검색이나 통계 같은 조회는 jOOQ로 한다.
@@ -106,6 +119,8 @@ docker run -p 8080:8080 \
 - `POST /api/items` - 생성 (201, Location 헤더)
 - `GET /api/items` - 목록 (최신순)
 - `GET /api/items/{id}` - 조회 (없으면 404)
+- `PUT /api/items/{id}` - 수정 (없으면 404)
+- `DELETE /api/items/{id}` - 삭제 (204, 없으면 404)
 - `GET /api/items/search?keyword=&page=0&size=20` - 이름 검색 + 페이징 (jOOQ)
 
 오류는 Problem Details(`application/problem+json`)로 응답하고, 입력값 검증 실패 시 `errors`에 필드별 메시지가 들어간다.

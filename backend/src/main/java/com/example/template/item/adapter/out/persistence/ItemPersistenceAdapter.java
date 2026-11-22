@@ -1,7 +1,9 @@
 package com.example.template.item.adapter.out.persistence;
 
+import com.example.template.item.application.port.out.DeleteItemPort;
 import com.example.template.item.application.port.out.LoadItemPort;
 import com.example.template.item.application.port.out.SaveItemPort;
+import com.example.template.item.application.port.out.UpdateItemPort;
 import com.example.template.item.domain.Item;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
@@ -10,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-class ItemPersistenceAdapter implements SaveItemPort, LoadItemPort {
+class ItemPersistenceAdapter implements SaveItemPort, LoadItemPort, UpdateItemPort, DeleteItemPort {
 
     private final ItemJpaRepository repository;
 
@@ -22,6 +24,24 @@ class ItemPersistenceAdapter implements SaveItemPort, LoadItemPort {
     public Item save(Item item) {
         ItemJpaEntity saved = repository.save(toEntity(item));
         return toDomain(saved);
+    }
+
+    // 영속 상태 엔티티에 값만 옮긴다. save() 없이 트랜잭션 커밋 때 더티 체킹으로 UPDATE 된다.
+    // 같은 트랜잭션에서 방금 조회한 엔티티는 1차 캐시에서 나오므로 SELECT가 다시 나가지 않는다
+    @Override
+    public void update(Item item) {
+        ItemJpaEntity entity = repository.findById(item.id())
+                .orElseThrow(() -> new IllegalStateException("item not found: " + item.id()));
+        entity.update(item.name(), item.description());
+    }
+
+    @Override
+    public boolean deleteById(long id) {
+        if (!repository.existsById(id)) {
+            return false;
+        }
+        repository.deleteById(id);
+        return true;
     }
 
     @Override

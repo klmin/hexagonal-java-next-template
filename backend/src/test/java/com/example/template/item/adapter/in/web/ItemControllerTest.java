@@ -4,10 +4,13 @@ import com.example.template.common.error.DomainValidationException;
 import com.example.template.item.application.ItemNotFoundException;
 import com.example.template.item.application.port.in.CreateItemCommand;
 import com.example.template.item.application.port.in.CreateItemUseCase;
+import com.example.template.item.application.port.in.DeleteItemUseCase;
 import com.example.template.item.application.port.in.GetItemUseCase;
 import com.example.template.item.application.port.in.ItemSearchResult;
 import com.example.template.item.application.port.in.SearchItemsQuery;
 import com.example.template.item.application.port.in.SearchItemsUseCase;
+import com.example.template.item.application.port.in.UpdateItemCommand;
+import com.example.template.item.application.port.in.UpdateItemUseCase;
 import com.example.template.item.domain.Item;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +24,12 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -43,6 +50,12 @@ class ItemControllerTest {
 
     @MockitoBean
     private SearchItemsUseCase searchItemsUseCase;
+
+    @MockitoBean
+    private UpdateItemUseCase updateItemUseCase;
+
+    @MockitoBean
+    private DeleteItemUseCase deleteItemUseCase;
 
     @Test
     void createReturns201WithLocation() throws Exception {
@@ -149,5 +162,58 @@ class ItemControllerTest {
                 .andExpect(status().isInternalServerError())
                 .andExpect(header().string("Content-Type", MediaType.APPLICATION_PROBLEM_JSON_VALUE))
                 .andExpect(jsonPath("$.detail").value("서버 오류가 발생했습니다."));
+    }
+
+    @Test
+    void updateReturnsUpdatedItem() throws Exception {
+        given(updateItemUseCase.update(new UpdateItemCommand(1L, "데스크톱", null)))
+                .willReturn(Item.restore(1L, "데스크톱", null, NOW));
+
+        mockMvc.perform(put("/api/items/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name": "데스크톱"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("데스크톱"));
+    }
+
+    @Test
+    void updateRejectsBlankName() throws Exception {
+        mockMvc.perform(put("/api/items/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name": ""}
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].field").value("name"));
+    }
+
+    @Test
+    void updateReturns404WhenMissing() throws Exception {
+        given(updateItemUseCase.update(any(UpdateItemCommand.class))).willThrow(new ItemNotFoundException(99L));
+
+        mockMvc.perform(put("/api/items/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name": "a"}
+                                """))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteReturns204() throws Exception {
+        mockMvc.perform(delete("/api/items/1"))
+                .andExpect(status().isNoContent());
+
+        verify(deleteItemUseCase).delete(1L);
+    }
+
+    @Test
+    void deleteReturns404WhenMissing() throws Exception {
+        willThrow(new ItemNotFoundException(99L)).given(deleteItemUseCase).delete(99L);
+
+        mockMvc.perform(delete("/api/items/99"))
+                .andExpect(status().isNotFound());
     }
 }
