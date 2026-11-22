@@ -23,13 +23,16 @@ Next.js 16은 이전 버전과 API가 다르다. 쓰려는 기능의 문서를 `
 - `src/app/<경로>/` 아래에 async 서버 컴포넌트로 만든다.
 - 캐시하지 않는 데이터는 페이지에서 `<Suspense fallback={...}>`로 감싼다. 감싸지 않으면 `next build`가 실패한다.
 - 백엔드 장애 시 페이지 전체가 깨지지 않도록 컴포넌트 안에서 오류 메시지를 보여 주거나 `error.tsx`를 둔다.
-- 동적 경로의 params는 `PageProps<'/경로/[id]'>`로 받고 `await props.params`로 읽는다.
+- 동적 경로의 params는 `PageProps<'/경로/[id]'>`로 받는다. params는 요청 시점 데이터라 페이지에서 await 하지 말고 Suspense 안의 자식 컴포넌트로 넘겨서 await 한다 (`items/[id]/edit/page.tsx` 참고). 백엔드 404는 `notFound()`로 바꾼다.
+- JSX를 try/catch 안에서 만들지 않는다 (lint 오류). 데이터 조회만 try 안에서 한다.
 
 ## 3. 변경 (Server Action)
 - `actions.ts` (`"use server"`)에 `(prevState, formData) => Promise<State>` 형태로 작성한다.
 - 예상 가능한 오류(검증, 4xx)는 throw하지 않고 `{ error }`로 반환한다.
 - 성공하면 `refresh()`(`next/cache`)를 호출한다. 다른 페이지로 이동해야 하면 `redirect()`를 쓴다.
 - 폼은 클라이언트 컴포넌트에서 `useActionState`(`react`)로 연결하고 `pending`으로 버튼을 비활성화한다.
+- 대상 id 같은 값은 `action.bind(null, id)`로 넘긴다 (`deleteItemAction`, `updateItemAction` 참고).
+- `redirect()`는 예외로 동작하므로 try/catch 밖에서 부른다.
 
 ## 4. 규칙
 - 브라우저에서 백엔드를 직접 호출하지 않는다. 서버 전용 값을 `NEXT_PUBLIC_`으로 만들지 않는다.
@@ -37,7 +40,7 @@ Next.js 16은 이전 버전과 API가 다르다. 쓰려는 기능의 문서를 `
 
 ## 5. 테스트
 - 클라이언트 컴포넌트, 유틸은 Vitest로 (`create-item-form.test.tsx`, `client.test.ts` 참고). Server Action은 `vi.mock`으로 대체한다.
-- async 서버 컴포넌트와 화면 흐름은 `e2e/`에 Playwright 테스트를 추가한다 (`items.spec.ts` 참고). Next.js 라우트 안내 요소가 `role=alert`이라 alert는 범위를 좁혀서 찾는다.
+- async 서버 컴포넌트와 화면 흐름은 `e2e/`에 Playwright 테스트를 추가한다 (`items.spec.ts` 참고). Next.js 라우트 안내 요소가 `role=alert`이라 alert는 범위를 좁혀서 찾는다. 이동한 뒤에는 이전 화면이 숨겨진 채 남아 있으므로, 같은 라벨이 두 화면에 있으면 현재 화면의 `main` 안에서 찾는다.
 
 ## 6. 검증
 ```bash
