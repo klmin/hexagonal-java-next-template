@@ -30,6 +30,14 @@ public final class Item {
         return new Item(Objects.requireNonNull(id, "id"), name, description, createdAt);
     }
 
+    /** 이름, 설명을 바꾼 새 Item을 돌려준다. 저장된(id가 있는) Item만 바꿀 수 있다. */
+    public Item update(String name, String description) {
+        if (id == null) {
+            throw new IllegalStateException("저장되지 않은 Item은 수정할 수 없다");
+        }
+        return new Item(id, name, description, createdAt);
+    }
+
     private static String validateName(String name) {
         if (name == null || name.isBlank()) {
             throw new DomainValidationException("name must not be blank");

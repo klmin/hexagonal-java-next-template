@@ -2,8 +2,11 @@ package com.example.template.item.application.service;
 
 import com.example.template.item.application.ItemNotFoundException;
 import com.example.template.item.application.port.in.CreateItemCommand;
+import com.example.template.item.application.port.in.UpdateItemCommand;
+import com.example.template.item.application.port.out.DeleteItemPort;
 import com.example.template.item.application.port.out.LoadItemPort;
 import com.example.template.item.application.port.out.SaveItemPort;
+import com.example.template.item.application.port.out.UpdateItemPort;
 import com.example.template.item.domain.Item;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +25,7 @@ class ItemServiceTest {
     private static final Instant NOW = Instant.parse("2026-01-01T00:00:00Z");
 
     private final InMemoryItemStore store = new InMemoryItemStore();
-    private final ItemService service = new ItemService(store, store, Clock.fixed(NOW, ZoneOffset.UTC));
+    private final ItemService service = new ItemService(store, store, store, store, Clock.fixed(NOW, ZoneOffset.UTC));
 
     @Test
     void createAssignsIdAndCurrentTime() {
@@ -47,7 +50,38 @@ class ItemServiceTest {
         assertThat(service.getItems()).hasSize(2);
     }
 
-    private static final class InMemoryItemStore implements SaveItemPort, LoadItemPort {
+    @Test
+    void updateChangesStoredItem() {
+        Item created = service.create(new CreateItemCommand("노트북", "업무용"));
+
+        Item updated = service.update(new UpdateItemCommand(created.id(), "데스크톱", null));
+
+        assertThat(updated.name()).isEqualTo("데스크톱");
+        assertThat(service.getItem(created.id()).name()).isEqualTo("데스크톱");
+        assertThat(service.getItem(created.id()).createdAt()).isEqualTo(NOW);
+    }
+
+    @Test
+    void updateThrowsWhenMissing() {
+        assertThatThrownBy(() -> service.update(new UpdateItemCommand(99L, "a", null)))
+                .isInstanceOf(ItemNotFoundException.class);
+    }
+
+    @Test
+    void deleteRemovesItem() {
+        Item created = service.create(new CreateItemCommand("노트북", null));
+
+        service.delete(created.id());
+
+        assertThatThrownBy(() -> service.getItem(created.id())).isInstanceOf(ItemNotFoundException.class);
+    }
+
+    @Test
+    void deleteThrowsWhenMissing() {
+        assertThatThrownBy(() -> service.delete(99L)).isInstanceOf(ItemNotFoundException.class);
+    }
+
+    private static final class InMemoryItemStore implements SaveItemPort, LoadItemPort, UpdateItemPort, DeleteItemPort {
 
         private final List<Item> items = new ArrayList<>();
 
@@ -66,6 +100,16 @@ class ItemServiceTest {
         @Override
         public List<Item> findAll() {
             return List.copyOf(items);
+        }
+
+        @Override
+        public void update(Item item) {
+            items.replaceAll(existing -> existing.id().equals(item.id()) ? item : existing);
+        }
+
+        @Override
+        public boolean deleteById(long id) {
+            return items.removeIf(item -> item.id() == id);
         }
     }
 }
