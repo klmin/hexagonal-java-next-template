@@ -15,7 +15,7 @@ spring:
 # 모니터링 (infra/observability 참고)
 #   메트릭: 관리 포트의 /actuator/prometheus 를 Alloy가 가져감
 #   트레이스: OTLP로 Alloy에 보냄. 스택이 있을 때만 OTLP_TRACING_ENABLED=true
-#   로그: LOG_FILE을 주면 JSON으로 파일에 남기고 Alloy가 읽음. traceId/spanId 포함
+#   로그: 콘솔이 기본. LOG_CONSOLE_FORMAT=logstash 면 콘솔을 JSON으로, LOG_FILE 을 주면 JSON 파일로도 남김. traceId/spanId 포함
 management:
   server:
     port: ${MANAGEMENT_PORT:8081}
@@ -50,6 +50,9 @@ logging:
   structured:
     format:
       file: logstash
+      # 콘솔 로그 형식. 비우면 사람이 읽는 텍스트, logstash 또는 ecs 면 한 줄 JSON (traceId 포함).
+      # Docker, k8s 에서 수집기(Alloy, Promtail, Fluent Bit 등)가 컨테이너 로그를 읽을 때 켠다
+      console: ${LOG_CONSOLE_FORMAT:}
 
 # API 문서: /swagger-ui.html, /v3/api-docs. 운영에서 숨기려면 API_DOCS_ENABLED=false
 springdoc:

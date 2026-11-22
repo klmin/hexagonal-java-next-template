@@ -39,7 +39,8 @@ Spring이 `backend/.env`를 properties 파일로 읽는다 (`application.yml`의
 | `OTLP_TRACING_ENABLED` | false | 모니터링 쓸 때 true | 수집기가 있으면 true | 트레이스 전송 여부 |
 | `OTLP_TRACING_ENDPOINT` | http://localhost:4318/v1/traces | - | 수집기 주소 | OTLP HTTP |
 | `TRACING_SAMPLING_PROBABILITY` | 1.0 | - | 선택 (예: 0.1) | 트레이스를 만들 요청 비율 |
-| `LOG_FILE` | (없음) | 모니터링 쓸 때 `logs/backend.log` | 수집 방식에 따라 | 지정하면 JSON 로그 파일. 없으면 콘솔 로그만 |
+| `LOG_CONSOLE_FORMAT` | (없음) | - | 수집기가 컨테이너 로그를 읽으면 `logstash` | 콘솔 로그 형식. 비우면 텍스트, `logstash`/`ecs`면 한 줄 JSON (traceId 포함) |
+| `LOG_FILE` | (없음) | 모니터링 쓸 때 `logs/backend.log` | 보통 불필요 | 지정하면 JSON 로그 파일. 앱이 호스트에서 돌 때 Alloy가 파일을 읽는 방식 |
 | `JAVA_TOOL_OPTIONS` | (없음) | - | 선택 | JVM 옵션. 이미지에는 `-XX:MaxRAMPercentage=75`가 들어 있다 |
 
 헬스체크: `http://<host>:<MANAGEMENT_PORT>/actuator/health` (liveness, readiness 그룹 포함)
@@ -74,4 +75,10 @@ Spring이 `backend/.env`를 properties 파일로 읽는다 (`application.yml`의
 |---|---|---|
 | 로컬 (`bootRun`, `npm run dev`) | 없음 | 없음 |
 | 루트 compose | compose가 넣어 줌 (`.env`로 포트, DB 계정만 변경) | compose가 넣어 줌 |
-| 운영 | `SPRING_DATASOURCE_*`, `API_DOCS_ENABLED=false`, `APP_ENV` (+ 모니터링 쓰면 `OTLP_*`) | `BACKEND_URL` |
+| 운영 | `SPRING_DATASOURCE_*`, `API_DOCS_ENABLED=false`, `APP_ENV` (+ 모니터링 쓰면 `OTLP_*`, `LOG_CONSOLE_FORMAT=logstash`) | `BACKEND_URL` |
+
+### 로그는 어떻게 남나
+
+- 앱은 항상 콘솔(표준출력)에 로그를 쓴다. Docker는 이걸 그대로 모으므로 `docker compose logs backend`로 볼 수 있다.
+- 로그 수집기(Loki 등)로 보낼 때는 콘솔을 JSON으로 바꾼다: `LOG_CONSOLE_FORMAT=logstash`. Docker, k8s 모두 이 방식이 일반적이다.
+- `LOG_FILE`은 앱을 호스트에서 직접 띄우고 `infra/observability`의 Alloy가 파일을 읽는 로컬 구성용이다.
