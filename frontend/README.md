@@ -71,9 +71,12 @@ src/
 │   ├── not-found.tsx
 │   ├── loading.tsx
 │   └── items/
-│       ├── actions.ts           # Server Action (생성 후 refresh)
+│       ├── actions.ts           # Server Action (생성/삭제 후 refresh, 수정 후 redirect)
 │       ├── create-item-form.tsx # 폼 (useActionState)
-│       └── item-list.tsx        # 서버 컴포넌트, 요청마다 조회
+│       ├── item-list.tsx        # 서버 컴포넌트, 요청마다 조회, 수정 링크/삭제 버튼
+│       └── [id]/edit/
+│           ├── page.tsx         # 동적 경로. params 를 Suspense 안에서 await
+│           └── edit-item-form.tsx
 ├── lib/
 │   ├── env.ts                   # 서버 환경변수 검증 (zod)
 │   └── api/
