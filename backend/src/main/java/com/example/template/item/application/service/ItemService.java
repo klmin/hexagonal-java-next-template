@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -71,10 +70,5 @@ public class ItemService implements CreateItemUseCase, GetItemUseCase, UpdateIte
     @Override
     public Item getItem(long id) {
         return loadItemPort.findById(id).orElseThrow(() -> new ItemNotFoundException(id));
-    }
-
-    @Override
-    public List<Item> getItems() {
-        return loadItemPort.findAll();
     }
 }

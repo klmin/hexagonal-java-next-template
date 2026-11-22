@@ -69,6 +69,24 @@ SPRING_DATASOURCE_PASSWORD=<password>
 
 도메인 객체를 바꾸는 것만으로는 저장되지 않는다. 엔티티로 옮기는 3번이 꼭 필요하다.
 
+### 동시 수정
+
+샘플에는 동시 수정 충돌 처리가 없다. 두 사람이 같은 항목을 고치면 나중에 저장한 쪽이 이긴다.
+여러 사람이 같은 데이터를 함께 편집하는 기능(문서, 재고, 결재 등)이면 낙관적 락을 넣는다.
+
+1. 테이블에 `version` 컬럼(마이그레이션), 엔티티에 `@Version`
+2. 도메인 모델, 응답 DTO, 수정 요청에 `version`을 싣는다 (수정 화면이 받은 값을 그대로 돌려보낸다)
+3. 어댑터에서 요청의 version과 엔티티의 version이 다르면 충돌 예외를 던지고, 전역 핸들러에서 409로 바꾼다
+
+엔티티에 `@Version`만 붙이면 같은 순간에 겹친 저장만 막고, "화면을 열어 둔 사이 다른 사람이 저장한" 경우는 막지 못한다.
+
+## 목록 페이징
+
+- 목록(`GET /api/items`)은 커서 페이징이다. `WHERE id < 커서 ORDER BY id DESC LIMIT size+1`로 읽어서 OFFSET 없이 PK 인덱스로 바로 찾아간다. 데이터가 많아도 뒤 페이지가 느려지지 않고, 중간에 항목이 추가돼도 중복/누락이 없다.
+- 한 개 더 읽어서 다음 페이지가 있는지 판단하므로 count 쿼리가 없다.
+- 커서는 클라이언트에 불투명한 문자열(Base64URL)로 준다 (`ItemCursor`). 정렬 기준을 바꿔도 API 형태는 그대로다.
+- 전체 개수나 페이지 번호가 필요한 화면(관리자 표 등)은 검색 API처럼 OFFSET 페이징을 쓴다 (`/api/items/search`).
+
 ## JPA와 jOOQ
 
 - 저장/수정(도메인 모델 단위)은 JPA, 검색이나 통계 같은 조회는 jOOQ로 한다.
@@ -117,7 +135,7 @@ docker run -p 8080:8080 \
 ## 샘플 API
 
 - `POST /api/items` - 생성 (201, Location 헤더)
-- `GET /api/items` - 목록 (최신순)
+- `GET /api/items?cursor=&size=20` - 목록 (최신순, 커서 페이징). 응답 `{ items, nextCursor }`, 다음 페이지는 `nextCursor`를 그대로 넘긴다. 마지막 페이지면 `nextCursor: null`
 - `GET /api/items/{id}` - 조회 (없으면 404)
 - `PUT /api/items/{id}` - 수정 (없으면 404)
 - `DELETE /api/items/{id}` - 삭제 (204, 없으면 404)

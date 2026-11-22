@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Import;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.time.ZoneOffset;
 
 import static com.example.template.common.jooq.Tables.ITEMS;
@@ -57,5 +58,14 @@ class ItemSearchAdapterTest {
         assertThat(first.totalCount()).isEqualTo(4);
         assertThat(first.items()).extracting(Item::name).containsExactly("Notebook Stand", "마우스", "노트");
         assertThat(second.items()).extracting(Item::name).containsExactly("노트북");
+    }
+
+    @Test
+    void findBeforeReturnsNewestFirstAfterCursor() {
+        List<Item> first = adapter.findBefore(null, 2);
+        List<Item> next = adapter.findBefore(first.getLast().id(), 10);
+
+        assertThat(first).extracting(Item::name).containsExactly("Notebook Stand", "마우스");
+        assertThat(next).extracting(Item::name).containsExactly("노트", "노트북");
     }
 }

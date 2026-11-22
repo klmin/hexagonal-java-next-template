@@ -92,16 +92,32 @@
       "get" : {
         "tags" : [ "item-controller" ],
         "operationId" : "list",
+        "parameters" : [ {
+          "name" : "cursor",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 20,
+            "maximum" : 100,
+            "minimum" : 1
+          }
+        } ],
         "responses" : {
           "200" : {
             "description" : "OK",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/ItemResponse"
-                  }
+                  "$ref" : "#/components/schemas/ItemListResponse"
                 }
               }
             }
@@ -236,6 +252,22 @@
           }
         },
         "required" : [ "name" ]
+      },
+      "ItemListResponse" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ItemResponse"
+            }
+          },
+          "nextCursor" : {
+            "type" : [ "string", "null" ],
+            "description" : "다음 페이지 커서. 마지막 페이지면 null"
+          }
+        },
+        "required" : [ "items", "nextCursor" ]
       },
       "ItemPageResponse" : {
         "type" : "object",

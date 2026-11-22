@@ -72,6 +72,11 @@ export interface components {
             name: string;
             description?: string;
         };
+        ItemListResponse: {
+            items: components["schemas"]["ItemResponse"][];
+            /** @description 다음 페이지 커서. 마지막 페이지면 null */
+            nextCursor: string | null;
+        };
         ItemPageResponse: {
             items: components["schemas"]["ItemResponse"][];
             /** Format: int64 */
@@ -160,7 +165,10 @@ export interface operations {
     };
     list: {
         parameters: {
-            query?: never;
+            query?: {
+                cursor?: string;
+                size?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -173,7 +181,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ItemResponse"][];
+                    "application/json": components["schemas"]["ItemListResponse"];
                 };
             };
         };
