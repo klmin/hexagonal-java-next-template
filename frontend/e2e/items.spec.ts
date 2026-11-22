@@ -1,5 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+// 모든 테스트가 같은 백엔드 데이터를 쓴다. 페이징 테스트가 항목을 여러 개 만들면 병렬로 도는 다른 테스트의 항목이
+// 첫 페이지 밖으로 밀릴 수 있어서, 이 파일은 순서대로 실행한다 (실패해도 다음 테스트는 계속 돈다)
+test.describe.configure({ mode: "default" });
+
 test("항목을 추가하면 목록에 보인다", async ({ page }) => {
   const name = `e2e-${Date.now()}`;
 
