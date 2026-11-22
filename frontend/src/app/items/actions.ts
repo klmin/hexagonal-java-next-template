@@ -4,7 +4,7 @@ import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { ApiError } from "@/lib/api/client";
-import { createItem, deleteItem, updateItem } from "@/lib/api/items";
+import { createItem, deleteItem, isItemId, updateItem } from "@/lib/api/items";
 
 export type CreateItemState = {
   error?: string;
@@ -50,6 +50,9 @@ export async function updateItemAction(
   const description = String(formData.get("description") ?? "").trim();
   const values = { name, description };
 
+  if (!isItemId(id)) {
+    return { error: "잘못된 요청입니다.", values };
+  }
   if (!name) {
     return { error: "이름을 입력해 주세요.", values };
   }
@@ -68,14 +71,32 @@ export async function updateItemAction(
   redirect("/");
 }
 
-export async function deleteItemAction(id: number): Promise<void> {
+export type DeleteItemState = {
+  error?: string;
+};
+
+// 실패해도 목록 화면을 유지하고 오류를 상태로 돌려준다 (deleteItemAction.bind(null, id))
+export async function deleteItemAction(
+  id: number,
+  _prev: DeleteItemState,
+): Promise<DeleteItemState> {
+  if (!isItemId(id)) {
+    return { error: "잘못된 요청입니다." };
+  }
+
   try {
     await deleteItem(id);
   } catch (e) {
-    // 이미 지워졌으면 목록만 새로 그린다
+    // 이미 지워졌으면 성공으로 보고 목록만 새로 그린다
     if (!(e instanceof ApiError && e.status === 404)) {
-      throw e;
+      if (e instanceof ApiError) {
+        return { error: e.message };
+      }
+      console.error("deleteItemAction failed", e);
+      return { error: "삭제하지 못했습니다. 백엔드에 연결할 수 없습니다." };
     }
   }
+
   refresh();
+  return {};
 }

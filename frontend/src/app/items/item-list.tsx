@@ -3,7 +3,7 @@ import { unstable_rethrow } from "next/navigation";
 
 import { listItems, type Item } from "@/lib/api/items";
 
-import { deleteItemAction } from "./actions";
+import { DeleteItemButton } from "./delete-item-button";
 
 // cacheComponents 환경이라 <Suspense> 안에서 렌더링해야 함
 export async function ItemList() {
@@ -37,11 +37,7 @@ export async function ItemList() {
             <Link href={`/items/${item.id}/edit`} className="underline">
               수정
             </Link>
-            <form action={deleteItemAction.bind(null, item.id)}>
-              <button type="submit" className="text-red-600 underline">
-                삭제
-              </button>
-            </form>
+            <DeleteItemButton id={item.id} name={item.name} />
           </div>
         </li>
       ))}
