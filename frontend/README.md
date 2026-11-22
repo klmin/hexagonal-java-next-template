@@ -10,7 +10,8 @@ npm ci
 npm run dev
 ```
 
-백엔드가 `BACKEND_URL`(기본 http://localhost:8080)에서 떠 있어야 목록이 나온다.
+백엔드가 `BACKEND_URL`(기본 http://localhost:8080)에서 떠 있어야 목록이 나온다. 기본 포트 그대로면 `.env.local`은 없어도 된다.
+설정값 전체는 [docs/configuration.md](../docs/configuration.md).
 
 ## 스크립트
 
