@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { ApiError } from "@/lib/api/client";
 import { createItem, deleteItem, isItemId, updateItem } from "@/lib/api/items";
+import { logError } from "@/lib/log";
 
 export type CreateItemState = {
   error?: string;
@@ -30,7 +31,7 @@ export async function createItemAction(
     if (e instanceof ApiError) {
       return { error: e.message, values };
     }
-    console.error("createItemAction failed", e);
+    logError("createItemAction failed", e);
     return { error: "백엔드에 연결할 수 없습니다.", values };
   }
 
@@ -63,7 +64,7 @@ export async function updateItemAction(
     if (e instanceof ApiError) {
       return { error: e.message, values };
     }
-    console.error("updateItemAction failed", e);
+    logError("updateItemAction failed", e);
     return { error: "백엔드에 연결할 수 없습니다.", values };
   }
 
@@ -92,7 +93,7 @@ export async function deleteItemAction(
       if (e instanceof ApiError) {
         return { error: e.message };
       }
-      console.error("deleteItemAction failed", e);
+      logError("deleteItemAction failed", e);
       return { error: "삭제하지 못했습니다. 백엔드에 연결할 수 없습니다." };
     }
   }

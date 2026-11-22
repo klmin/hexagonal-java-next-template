@@ -2,6 +2,7 @@ import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 
 import { listItems, type Item } from "@/lib/api/items";
+import { logError } from "@/lib/log";
 
 import { DeleteItemButton } from "./delete-item-button";
 
@@ -13,7 +14,7 @@ export async function ItemList() {
   } catch (err) {
     // try 안에서 notFound(), redirect() 등을 쓰면 Next.js 가 처리하게 다시 던진다
     unstable_rethrow(err);
-    console.error("ItemList failed", err);
+    logError("ItemList failed", err);
     return (
       <p className="text-sm text-red-600">
         목록을 불러오지 못했습니다. 백엔드가 실행 중인지 확인해 주세요.
