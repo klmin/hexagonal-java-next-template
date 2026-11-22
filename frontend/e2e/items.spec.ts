@@ -108,6 +108,13 @@ test("목록은 20개씩 나오고 다음 페이지로 이어진다", async ({ p
   await expect(page.getByText(`${prefix}-01`)).toBeVisible();
   await expect(page.getByText(`${prefix}-21`)).toHaveCount(0);
   await expect(page.getByRole("link", { name: "처음으로" })).toBeVisible();
+
+  // 다음 페이지에서 추가해도 새 항목이 보이도록 첫 페이지로 돌아간다
+  const created = `${prefix}-new`;
+  await page.getByLabel("이름").fill(created);
+  await page.getByRole("button", { name: "추가" }).click();
+  await expect(page).not.toHaveURL(/cursor=/);
+  await expect(page.getByText(created)).toBeVisible();
 });
 
 test("잘못된 커서는 첫 페이지로 보여 준다", async ({ page }) => {

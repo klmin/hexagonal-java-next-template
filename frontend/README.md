@@ -72,7 +72,7 @@ src/
 │   ├── not-found.tsx
 │   ├── loading.tsx
 │   └── items/
-│       ├── actions.ts           # Server Action (생성/삭제 후 refresh, 수정 후 redirect)
+│       ├── actions.ts           # Server Action (생성/수정 후 첫 페이지로 redirect, 삭제 후 refresh)
 │       ├── create-item-form.tsx # 폼 (useActionState)
 │       ├── item-list.tsx        # 서버 컴포넌트, 커서 페이징(?cursor=), 수정 링크/삭제 버튼
 │       └── [id]/edit/

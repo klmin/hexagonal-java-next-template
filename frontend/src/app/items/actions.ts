@@ -35,8 +35,8 @@ export async function createItemAction(
     return { error: "백엔드에 연결할 수 없습니다.", values };
   }
 
-  refresh();
-  return {};
+  // 새 항목은 최신순 첫 페이지에 나온다. 다음 페이지(?cursor=)를 보고 있었어도 첫 페이지로 돌아가야 보인다
+  redirect("/");
 }
 
 export type UpdateItemState = CreateItemState;
