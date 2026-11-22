@@ -5,11 +5,19 @@ import type { components } from "./schema";
 
 // 백엔드 openapi/openapi.json 에서 생성한 타입 (npm run api:types)
 export type Item = components["schemas"]["ItemResponse"];
+export type ItemPage = components["schemas"]["ItemListResponse"];
 export type CreateItemInput = components["schemas"]["CreateItemRequest"];
 export type UpdateItemInput = components["schemas"]["UpdateItemRequest"];
 
-export function listItems(): Promise<Item[]> {
-  return request<Item[]>("/api/items");
+// 백엔드 커서는 Base64URL 문자열이다. URL에서 받은 값이 다른 형태면 첫 페이지로 본다
+export function isCursor(value: unknown): value is string {
+  return typeof value === "string" && /^[A-Za-z0-9_-]{1,64}$/.test(value);
+}
+
+// 커서 페이징 목록 (최신순). 다음 페이지는 응답의 nextCursor 를 넘긴다
+export function listItems(cursor?: string): Promise<ItemPage> {
+  const query = isCursor(cursor) ? `?${new URLSearchParams({ cursor })}` : "";
+  return request<ItemPage>(`/api/items${query}`);
 }
 
 // Server Action 인자는 브라우저를 거쳐 오므로 그대로 믿지 않는다.

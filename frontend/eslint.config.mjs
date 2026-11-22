@@ -7,6 +7,15 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   prettier,
+  {
+    // 쓰지 않는 인자는 _ 로 시작하게 해서 표시한다 (예: Server Action 의 _prev)
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

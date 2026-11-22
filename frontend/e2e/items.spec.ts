@@ -79,3 +79,36 @@ test("없는 항목의 수정 화면은 404를 보여 준다", async ({ page }) 
 
   await expect(page.getByText("페이지를 찾을 수 없습니다")).toBeVisible();
 });
+
+test("목록은 20개씩 나오고 다음 페이지로 이어진다", async ({ page, request }) => {
+  const apiUrl = process.env.E2E_API_URL ?? "http://localhost:8080";
+  const prefix = `e2e-page-${Date.now()}`;
+  for (let i = 1; i <= 21; i++) {
+    const res = await request.post(`${apiUrl}/api/items`, {
+      data: { name: `${prefix}-${String(i).padStart(2, "0")}` },
+    });
+    expect(res.status()).toBe(201);
+  }
+
+  await page.goto("/");
+  // 최신순이라 가장 나중에 만든 21번이 첫 페이지 맨 위, 1번은 다음 페이지
+  await expect(page.getByText(`${prefix}-21`)).toBeVisible();
+  await expect(page.getByText(`${prefix}-01`)).toHaveCount(0);
+
+  await page
+    .getByRole("navigation", { name: "페이지" })
+    .getByRole("link", { name: "다음" })
+    .click();
+
+  await expect(page).toHaveURL(/\?cursor=/);
+  await expect(page.getByText(`${prefix}-01`)).toBeVisible();
+  await expect(page.getByText(`${prefix}-21`)).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "처음으로" })).toBeVisible();
+});
+
+test("잘못된 커서는 첫 페이지로 보여 준다", async ({ page }) => {
+  await page.goto("/?cursor=../../actuator");
+
+  await expect(page.getByRole("heading", { name: "Items" })).toBeVisible();
+  await expect(page.getByText("목록을 불러오지 못했습니다")).toHaveCount(0);
+});
