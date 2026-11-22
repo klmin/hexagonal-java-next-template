@@ -6,6 +6,7 @@ Spring Boot(헥사고날) 백엔드 + Next.js 프론트엔드 모노레포 템�
 - `backend/` - Spring Boot 4.1, Java 25, Gradle(Kotlin DSL), PostgreSQL, Flyway
 - `frontend/` - Next.js 16, React 19, TypeScript, Tailwind 4
 - `compose.yaml` - 전체 스택을 이미지로 실행 (E2E, 로컬 확인)
+- `docs/configuration.md` - 설정값 (환경변수, .env)
 - `openapi/` - API 스펙 (백엔드에서 생성, 프론트 타입 생성에 사용)
 - `infra/observability/` - 모니터링 스택 (Prometheus, Loki, Tempo, Grafana, Alloy)
 - `.github/` - CI, CodeQL, Dependabot, PR/이슈 템플릿
@@ -17,6 +18,9 @@ Spring Boot(헥사고날) 백엔드 + Next.js 프론트엔드 모노레포 템�
 - Docker
 
 ## 실행
+
+로컬 실행에 넣어야 하는 설정값은 없다. 바꿀 수 있는 값과 운영에서 넣을 값은 [docs/configuration.md](docs/configuration.md).
+IntelliJ에서는 `.run/`의 실행 설정(backend bootRun, frontend dev 등)을 바로 쓸 수 있다.
 
 ```bash
 # 백엔드 (compose.yaml의 PostgreSQL이 같이 뜸)
@@ -56,7 +60,7 @@ docker compose up -d --build --wait
 4. 샘플 `item` 기능은 참고 후 삭제하거나 실제 도메인으로 교체
 5. 저장소 설정 (템플릿에서 복사되지 않음)
    - **PR 자동 리뷰**: PR에 push할 때마다 Codex 리뷰를 요청하려면(`.github/workflows/codex-review-on-push.yml`) Actions secret `CODEX_TRIGGER_PAT`을 등록한다.
-     Codex 계정과 연결된 본인 GitHub의 fine-grained token(이 저장소만, Pull requests·Issues Read and write).
+     Codex 계정과 연결된 본인 GitHub의 fine-grained token(이 저장소만, Pull requests, Issues: Read and write).
      등록하지 않으면 이 워크플로는 요청 없이 건너뛴다
    - **main 보호 규칙**: `backend`, `frontend`, `e2e`, `template-init`, `infra` 워크플로는 바뀐 경로에서만 돈다.
      이 검사들을 필수(required)로 지정하면 해당 경로를 건드리지 않은 PR은 검사를 계속 기다리며 머지할 수 없다.

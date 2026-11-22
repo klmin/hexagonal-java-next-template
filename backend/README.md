@@ -44,7 +44,9 @@ jOOQ 코드가 이미 생성돼 있으면 Docker가 꺼져 있어도 빌드되�
 `spring-boot-docker-compose`가 `compose.yaml`의 PostgreSQL을 띄우고 접속 정보를 자동으로 넣어 준다.
 이 의존성은 `developmentOnly`라서 빌드된 jar에는 포함되지 않는다.
 
-운영(jar 실행)에서는 환경변수로 넣는다.
+로컬에서 기본값을 바꾸려면 `backend/.env`를 만든다 (`.env.example` 참고). 없으면 무시한다.
+
+운영(jar 실행)에서는 환경변수로 넣는다. 전체 목록은 [docs/configuration.md](../docs/configuration.md).
 
 ```bash
 SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:5432/<db>

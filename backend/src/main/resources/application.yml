@@ -1,6 +1,9 @@
 spring:
   application:
     name: backend
+  # backend/.env 가 있으면 읽는다 (없으면 무시). 셸/OS 환경변수가 .env 보다 우선한다
+  config:
+    import: optional:file:.env[.properties]
   jpa:
     open-in-view: false
     hibernate:
