@@ -30,3 +30,52 @@ test("없는 페이지는 404 화면을 보여 준다", async ({ page }) => {
   expect(response?.status()).toBe(404);
   await expect(page.getByText("페이지를 찾을 수 없습니다")).toBeVisible();
 });
+
+test("항목을 수정하면 목록에 바뀐 이름이 보인다", async ({ page }) => {
+  const name = `e2e-edit-${Date.now()}`;
+  const renamed = `${name}-renamed`;
+
+  await page.goto("/");
+  await page.getByLabel("이름").fill(name);
+  await page.getByRole("button", { name: "추가" }).click();
+
+  const row = page.getByRole("listitem").filter({ hasText: name });
+  await row.getByRole("link", { name: "수정" }).click();
+
+  // Next.js 16 은 이전 화면을 숨긴 채 남겨 두므로 수정 화면(main) 안에서 찾는다
+  const editPage = page.getByRole("main").filter({
+    has: page.getByRole("heading", { name: "항목 수정" }),
+  });
+  await expect(editPage).toBeVisible();
+  await expect(editPage.getByLabel("이름")).toHaveValue(name);
+  await editPage.getByLabel("이름").fill(renamed);
+  await editPage.getByRole("button", { name: "저장" }).click();
+
+  await expect(page).toHaveURL("/");
+  await expect(page.getByText(renamed)).toBeVisible();
+});
+
+test("항목을 삭제하면 목록에서 사라진다", async ({ page }) => {
+  const name = `e2e-delete-${Date.now()}`;
+
+  await page.goto("/");
+  await page.getByLabel("이름").fill(name);
+  await page.getByRole("button", { name: "추가" }).click();
+  await expect(page.getByText(name)).toBeVisible();
+
+  await page
+    .getByRole("listitem")
+    .filter({ hasText: name })
+    .getByRole("button", { name: "삭제" })
+    .click();
+
+  await expect(page.getByText(name)).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByText(name)).toHaveCount(0);
+});
+
+test("없는 항목의 수정 화면은 404를 보여 준다", async ({ page }) => {
+  await page.goto("/items/999999999/edit");
+
+  await expect(page.getByText("페이지를 찾을 수 없습니다")).toBeVisible();
+});
