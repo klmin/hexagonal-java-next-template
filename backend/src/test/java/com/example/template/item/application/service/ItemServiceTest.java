@@ -76,10 +76,12 @@ class ItemServiceTest {
     private static final class InMemoryItemStore implements SaveItemPort, LoadItemPort, UpdateItemPort, DeleteItemPort {
 
         private final List<Item> items = new ArrayList<>();
+        // 실제 DB 시퀀스처럼 지워도 번호를 재사용하지 않는다 (items.size() + 1 은 삭제 뒤 중복 id 를 만든다)
+        private long sequence;
 
         @Override
         public Item save(Item item) {
-            Item saved = Item.restore((long) items.size() + 1, item.name(), item.description(), item.createdAt());
+            Item saved = Item.restore(++sequence, item.name(), item.description(), item.createdAt());
             items.add(saved);
             return saved;
         }
