@@ -10,10 +10,9 @@ import com.example.template.item.application.port.out.ItemPageResult;
 import com.example.template.item.application.port.out.ListItemsPort;
 import com.example.template.item.application.port.out.SearchItemsPort;
 import com.example.template.item.domain.Item;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)

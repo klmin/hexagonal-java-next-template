@@ -1,5 +1,6 @@
 package codegen;
 
+import java.nio.file.Path;
 import org.flywaydb.core.Flyway;
 import org.jooq.codegen.GenerationTool;
 import org.jooq.meta.jaxb.Configuration;
@@ -11,8 +12,6 @@ import org.jooq.meta.jaxb.Target;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
-
-import java.nio.file.Path;
 
 // ./gradlew generateJooq 에서 실행됨. args: <migration dir> <output dir> <package>
 public final class JooqCodegen {

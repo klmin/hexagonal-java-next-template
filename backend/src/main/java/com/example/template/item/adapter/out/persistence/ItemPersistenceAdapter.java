@@ -5,9 +5,8 @@ import com.example.template.item.application.port.out.LoadItemPort;
 import com.example.template.item.application.port.out.SaveItemPort;
 import com.example.template.item.application.port.out.UpdateItemPort;
 import com.example.template.item.domain.Item;
-import org.springframework.stereotype.Component;
-
 import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 @Component
 class ItemPersistenceAdapter implements SaveItemPort, LoadItemPort, UpdateItemPort, DeleteItemPort {
@@ -28,7 +27,8 @@ class ItemPersistenceAdapter implements SaveItemPort, LoadItemPort, UpdateItemPo
     // 같은 트랜잭션에서 방금 조회한 엔티티는 1차 캐시에서 나오므로 SELECT가 다시 나가지 않는다
     @Override
     public void update(Item item) {
-        ItemJpaEntity entity = repository.findById(item.id())
+        ItemJpaEntity entity = repository
+                .findById(item.id())
                 .orElseThrow(() -> new IllegalStateException("item not found: " + item.id()));
         entity.update(item.name(), item.description());
     }

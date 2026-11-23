@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
 import java.time.Instant;
 
 @Entity
@@ -26,8 +25,7 @@ class ItemJpaEntity {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
-    protected ItemJpaEntity() {
-    }
+    protected ItemJpaEntity() {}
 
     ItemJpaEntity(Long id, String name, String description, Instant createdAt) {
         this.id = id;

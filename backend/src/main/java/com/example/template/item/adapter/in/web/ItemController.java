@@ -12,6 +12,7 @@ import com.example.template.item.domain.Item;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import java.net.URI;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,8 +27,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
-
 @RestController
 @RequestMapping("/api/items")
 public class ItemController {
@@ -39,9 +38,13 @@ public class ItemController {
     private final DeleteItemUseCase deleteItemUseCase;
     private final ListItemsUseCase listItemsUseCase;
 
-    public ItemController(CreateItemUseCase createItemUseCase, GetItemUseCase getItemUseCase,
-                          SearchItemsUseCase searchItemsUseCase, UpdateItemUseCase updateItemUseCase,
-                          DeleteItemUseCase deleteItemUseCase, ListItemsUseCase listItemsUseCase) {
+    public ItemController(
+            CreateItemUseCase createItemUseCase,
+            GetItemUseCase getItemUseCase,
+            SearchItemsUseCase searchItemsUseCase,
+            UpdateItemUseCase updateItemUseCase,
+            DeleteItemUseCase deleteItemUseCase,
+            ListItemsUseCase listItemsUseCase) {
         this.createItemUseCase = createItemUseCase;
         this.getItemUseCase = getItemUseCase;
         this.searchItemsUseCase = searchItemsUseCase;

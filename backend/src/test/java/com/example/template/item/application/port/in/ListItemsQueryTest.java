@@ -1,9 +1,9 @@
 package com.example.template.item.application.port.in;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.example.template.common.error.DomainValidationException;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ListItemsQueryTest {
 

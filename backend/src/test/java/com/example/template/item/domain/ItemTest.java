@@ -1,12 +1,11 @@
 package com.example.template.item.domain;
 
-import com.example.template.common.error.DomainValidationException;
-import org.junit.jupiter.api.Test;
-
-import java.time.Instant;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import com.example.template.common.error.DomainValidationException;
+import java.time.Instant;
+import org.junit.jupiter.api.Test;
 
 class ItemTest {
 
@@ -29,22 +28,19 @@ class ItemTest {
 
     @Test
     void rejectsBlankName() {
-        assertThatThrownBy(() -> Item.create(" ", null, NOW))
-                .isInstanceOf(DomainValidationException.class);
+        assertThatThrownBy(() -> Item.create(" ", null, NOW)).isInstanceOf(DomainValidationException.class);
     }
 
     @Test
     void rejectsTooLongName() {
         String name = "a".repeat(Item.NAME_MAX_LENGTH + 1);
 
-        assertThatThrownBy(() -> Item.create(name, null, NOW))
-                .isInstanceOf(DomainValidationException.class);
+        assertThatThrownBy(() -> Item.create(name, null, NOW)).isInstanceOf(DomainValidationException.class);
     }
 
     @Test
     void restoreRequiresId() {
-        assertThatThrownBy(() -> Item.restore(null, "이름", null, NOW))
-                .isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> Item.restore(null, "이름", null, NOW)).isInstanceOf(NullPointerException.class);
     }
 
     @Test

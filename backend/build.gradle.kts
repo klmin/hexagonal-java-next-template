@@ -2,6 +2,8 @@ plugins {
     java
     id("org.springframework.boot") version "4.2.0"
     id("io.spring.dependency-management") version "1.1.7"
+    // 코드 포맷 검사. ./gradlew build 의 check 에 spotlessCheck 가 포함된다. 고치기: ./gradlew spotlessApply
+    id("com.diffplug.spotless") version "8.11.0"
 }
 
 group = "com.example"
@@ -72,13 +74,15 @@ val generateJooq = tasks.register<JavaExec>("generateJooq") {
     inputs.property("jooqPackage", jooqPackage)
     outputs.dir(jooqOutputDir)
     outputs.cacheIf { true }
-    argumentProviders.add(CommandLineArgumentProvider {
-        listOf(
-            migrationDir.asFile.absolutePath,
-            jooqOutputDir.get().asFile.absolutePath,
-            jooqPackage,
-        )
-    })
+    argumentProviders.add(
+        CommandLineArgumentProvider {
+            listOf(
+                migrationDir.asFile.absolutePath,
+                jooqOutputDir.get().asFile.absolutePath,
+                jooqPackage,
+            )
+        },
+    )
     // 이전 패키지로 생성된 코드가 남아 같이 컴파일되지 않게 비우고 생성한다
     doFirst {
         jooqOutputDir.get().asFile.deleteRecursively()
@@ -104,7 +108,7 @@ tasks.withType<Test> {
             if (suite.parent == null) {
                 println(
                     "Tests: ${result.testCount}, passed: ${result.successfulTestCount}, " +
-                        "failed: ${result.failedTestCount}, skipped: ${result.skippedTestCount}"
+                        "failed: ${result.failedTestCount}, skipped: ${result.skippedTestCount}",
                 )
             }
         }
@@ -142,4 +146,18 @@ tasks.register<Test>("updateOpenApi") {
 // Docker 이미지에는 실행 jar(bootJar) 하나만 쓴다
 tasks.jar {
     enabled = false
+}
+
+// 자바: palantir-java-format (google-java-format 기반, 4칸 들여쓰기). jOOQ 생성 코드(build/)는 대상이 아니다
+// Gradle 스크립트: ktlint, 규칙은 루트 .editorconfig
+spotless {
+    java {
+        target("src/**/*.java")
+        palantirJavaFormat("2.103.0")
+        removeUnusedImports()
+    }
+    kotlinGradle {
+        target("*.gradle.kts")
+        ktlint("1.8.0").setEditorConfigPath(rootProject.file("../.editorconfig"))
+    }
 }

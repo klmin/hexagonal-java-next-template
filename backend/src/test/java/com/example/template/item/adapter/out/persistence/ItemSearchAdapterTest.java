@@ -1,8 +1,14 @@
 package com.example.template.item.adapter.out.persistence;
 
+import static com.example.template.common.jooq.Tables.ITEMS;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.example.template.TestcontainersConfiguration;
 import com.example.template.item.application.port.out.ItemPageResult;
 import com.example.template.item.domain.Item;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,13 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jooq.test.autoconfigure.JooqTest;
 import org.springframework.context.annotation.Import;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.time.ZoneOffset;
-
-import static com.example.template.common.jooq.Tables.ITEMS;
-import static org.assertj.core.api.Assertions.assertThat;
 
 @JooqTest
 @Import({TestcontainersConfiguration.class, ItemSearchAdapter.class})
@@ -33,7 +32,7 @@ class ItemSearchAdapterTest {
 
     @BeforeEach
     void setUp() {
-        for (String name : new String[]{"노트북", "노트", "마우스", "Notebook Stand"}) {
+        for (String name : new String[] {"노트북", "노트", "마우스", "Notebook Stand"}) {
             dsl.insertInto(ITEMS)
                     .set(ITEMS.NAME, name)
                     .set(ITEMS.CREATED_AT, NOW)

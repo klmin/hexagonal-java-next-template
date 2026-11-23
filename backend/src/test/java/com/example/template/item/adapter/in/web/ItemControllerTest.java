@@ -1,5 +1,17 @@
 package com.example.template.item.adapter.in.web;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.example.template.common.error.DomainValidationException;
 import com.example.template.item.application.ItemNotFoundException;
 import com.example.template.item.application.port.in.CreateItemCommand;
@@ -15,27 +27,14 @@ import com.example.template.item.application.port.in.SearchItemsUseCase;
 import com.example.template.item.application.port.in.UpdateItemCommand;
 import com.example.template.item.application.port.in.UpdateItemUseCase;
 import com.example.template.item.domain.Item;
+import java.time.Instant;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.Instant;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ItemController.class)
 class ItemControllerTest {
@@ -65,8 +64,7 @@ class ItemControllerTest {
 
     @Test
     void createReturns201WithLocation() throws Exception {
-        given(createItemUseCase.create(any(CreateItemCommand.class)))
-                .willReturn(Item.restore(1L, "노트북", null, NOW));
+        given(createItemUseCase.create(any(CreateItemCommand.class))).willReturn(Item.restore(1L, "노트북", null, NOW));
 
         mockMvc.perform(post("/api/items")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -113,8 +111,7 @@ class ItemControllerTest {
 
     @Test
     void listPassesDecodedCursor() throws Exception {
-        given(listItemsUseCase.list(new ListItemsQuery(7L, 2)))
-                .willReturn(new ItemListResult(List.of(), null));
+        given(listItemsUseCase.list(new ListItemsQuery(7L, 2))).willReturn(new ItemListResult(List.of(), null));
 
         mockMvc.perform(get("/api/items").param("cursor", ItemCursor.encode(7L)).param("size", "2"))
                 .andExpect(status().isOk())
@@ -123,10 +120,8 @@ class ItemControllerTest {
 
     @Test
     void listRejectsInvalidCursorAndSize() throws Exception {
-        mockMvc.perform(get("/api/items").param("cursor", "not-a-cursor!"))
-                .andExpect(status().isBadRequest());
-        mockMvc.perform(get("/api/items").param("size", "101"))
-                .andExpect(status().isBadRequest());
+        mockMvc.perform(get("/api/items").param("cursor", "not-a-cursor!")).andExpect(status().isBadRequest());
+        mockMvc.perform(get("/api/items").param("size", "101")).andExpect(status().isBadRequest());
     }
 
     @Test
@@ -182,7 +177,8 @@ class ItemControllerTest {
 
     @Test
     void unexpectedErrorReturns500ProblemWithoutInternalMessage() throws Exception {
-        given(listItemsUseCase.list(any(ListItemsQuery.class))).willThrow(new IllegalStateException("db password=secret"));
+        given(listItemsUseCase.list(any(ListItemsQuery.class)))
+                .willThrow(new IllegalStateException("db password=secret"));
 
         mockMvc.perform(get("/api/items"))
                 .andExpect(status().isInternalServerError())
@@ -229,8 +225,7 @@ class ItemControllerTest {
 
     @Test
     void deleteReturns204() throws Exception {
-        mockMvc.perform(delete("/api/items/1"))
-                .andExpect(status().isNoContent());
+        mockMvc.perform(delete("/api/items/1")).andExpect(status().isNoContent());
 
         verify(deleteItemUseCase).delete(1L);
     }
@@ -239,7 +234,6 @@ class ItemControllerTest {
     void deleteReturns404WhenMissing() throws Exception {
         willThrow(new ItemNotFoundException(99L)).given(deleteItemUseCase).delete(99L);
 
-        mockMvc.perform(delete("/api/items/99"))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(delete("/api/items/99")).andExpect(status().isNotFound());
     }
 }
