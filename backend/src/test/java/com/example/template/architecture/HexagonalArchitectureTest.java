@@ -1,7 +1,9 @@
 package com.example.template.architecture;
 
+import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.Dependency;
 import com.tngtech.archunit.core.domain.JavaClass;
+import com.tngtech.archunit.core.domain.JavaMethodCall;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
@@ -10,12 +12,22 @@ import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
 // 기능(feature) 패키지마다 domain <- application <- adapter 방향만 허용
@@ -24,6 +36,11 @@ class HexagonalArchitectureTest {
 
     private static final String ROOT = "com.example.template";
     private static final Pattern FEATURE = Pattern.compile(Pattern.quote(ROOT) + "\\.([^.]+)\\..*");
+    private static final String SPRING_TRANSACTIONAL = "org.springframework.transaction.annotation.Transactional";
+    private static final String JAKARTA_TRANSACTIONAL = "jakarta.transaction.Transactional";
+    private static final Set<Class<?>> TIME_TYPES = Set.of(
+            Instant.class, LocalDate.class, LocalDateTime.class, LocalTime.class,
+            OffsetDateTime.class, ZonedDateTime.class);
 
     @ArchTest
     static final ArchRule domainDependsOnNothingOutside = noClasses()
@@ -98,6 +115,55 @@ class HexagonalArchitectureTest {
     static final ArchRule featuresTalkThroughInputPorts = classes()
             .that().resideInAPackage(ROOT + "..")
             .should(onlyUseOtherFeaturesThroughInputPorts());
+
+    // JPA 엔티티, 리포지토리, 어댑터는 package-private. 엔티티는 어댑터 밖으로 나가지 않고 도메인 모델로 바뀐다
+    @ArchTest
+    static final ArchRule outboundAdaptersArePackagePrivate = classes()
+            .that().resideInAPackage("..adapter.out..")
+            .should().notBePublic()
+            .because("엔티티, 리포지토리, 어댑터는 포트 인터페이스로만 노출한다");
+
+    // 트랜잭션 경계는 유스케이스 구현(application.service)에만 둔다
+    @ArchTest
+    static final ArchRule transactionalClassesOnlyInServices = noClasses()
+            .that().resideOutsideOfPackage("..application.service..")
+            .should().beAnnotatedWith(SPRING_TRANSACTIONAL)
+            .orShould().beAnnotatedWith(JAKARTA_TRANSACTIONAL)
+            .because("트랜잭션 경계는 application.service 에 둔다");
+
+    @ArchTest
+    static final ArchRule transactionalMethodsOnlyInServices = noMethods()
+            .that().areDeclaredInClassesThat().resideOutsideOfPackage("..application.service..")
+            .should().beAnnotatedWith(SPRING_TRANSACTIONAL)
+            .orShould().beAnnotatedWith(JAKARTA_TRANSACTIONAL)
+            .because("트랜잭션 경계는 application.service 에 둔다");
+
+    // 현재 시각은 Clock Bean 으로 읽는다. Instant.now(clock) 처럼 Clock 을 넘기는 호출은 허용
+    @ArchTest
+    static final ArchRule noSystemTimeNow = noClasses()
+            .should().callMethodWhere(systemTimeNow())
+            .because("현재 시각은 주입받은 Clock 으로 읽어야 테스트에서 고정할 수 있다");
+
+    // 시스템 Clock 은 common.config 의 Clock Bean 에서만 만든다
+    @ArchTest
+    static final ArchRule systemClockOnlyInConfig = noClasses()
+            .that().resideOutsideOfPackage(ROOT + ".common.config..")
+            .should().callMethodWhere(systemClockFactory())
+            .because("Clock 은 Bean 으로 주입받는다");
+
+    private static DescribedPredicate<JavaMethodCall> systemTimeNow() {
+        return DescribedPredicate.describe("now() without Clock on java.time types", call ->
+                call.getName().equals("now")
+                        && TIME_TYPES.stream().anyMatch(t -> call.getTargetOwner().isEquivalentTo(t))
+                        && !call.getTarget().getRawParameterTypes().stream()
+                                .map(JavaClass::getName).toList()
+                                .equals(List.of(Clock.class.getName())));
+    }
+
+    private static DescribedPredicate<JavaMethodCall> systemClockFactory() {
+        return DescribedPredicate.describe("Clock.system*()", call ->
+                call.getTargetOwner().isEquivalentTo(Clock.class) && call.getName().startsWith("system"));
+    }
 
     private static Optional<String> featureOf(JavaClass javaClass) {
         Matcher m = FEATURE.matcher(javaClass.getName());
