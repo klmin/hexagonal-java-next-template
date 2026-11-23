@@ -1,6 +1,6 @@
 # backend
 
-Spring Boot 4.1 / Java 25 / Gradle(Kotlin DSL) / PostgreSQL / Flyway
+Spring Boot 4.2 / Java 25 / Gradle(Kotlin DSL) / PostgreSQL / Flyway
 
 ## 패키지 구조
 
