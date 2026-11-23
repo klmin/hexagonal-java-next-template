@@ -17,7 +17,11 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.MonthDay;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Year;
+import java.time.YearMonth;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +44,8 @@ class HexagonalArchitectureTest {
     private static final String JAKARTA_TRANSACTIONAL = "jakarta.transaction.Transactional";
     private static final Set<Class<?>> TIME_TYPES = Set.of(
             Instant.class, LocalDate.class, LocalDateTime.class, LocalTime.class,
-            OffsetDateTime.class, ZonedDateTime.class);
+            OffsetDateTime.class, OffsetTime.class, ZonedDateTime.class,
+            Year.class, YearMonth.class, MonthDay.class);
 
     @ArchTest
     static final ArchRule domainDependsOnNothingOutside = noClasses()
@@ -138,10 +143,12 @@ class HexagonalArchitectureTest {
             .orShould().beAnnotatedWith(JAKARTA_TRANSACTIONAL)
             .because("트랜잭션 경계는 application.service 에 둔다");
 
-    // 현재 시각은 Clock Bean 으로 읽는다. Instant.now(clock) 처럼 Clock 을 넘기는 호출은 허용
+    // 현재 시각은 Clock Bean 으로 읽는다. Instant.now(clock) 처럼 Clock 을 넘기는 호출은 허용.
+    // System.currentTimeMillis() 대신 clock.millis(). 경과 시간 측정용 System.nanoTime() 은 허용
     @ArchTest
     static final ArchRule noSystemTimeNow = noClasses()
             .should().callMethodWhere(systemTimeNow())
+            .orShould().callMethod(System.class, "currentTimeMillis")
             .because("현재 시각은 주입받은 Clock 으로 읽어야 테스트에서 고정할 수 있다");
 
     // 시스템 Clock 은 common.config 의 Clock Bean 에서만 만든다
