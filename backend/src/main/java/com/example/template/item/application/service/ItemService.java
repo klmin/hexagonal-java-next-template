@@ -12,12 +12,11 @@ import com.example.template.item.application.port.out.LoadItemPort;
 import com.example.template.item.application.port.out.SaveItemPort;
 import com.example.template.item.application.port.out.UpdateItemPort;
 import com.example.template.item.domain.Item;
+import java.time.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Clock;
 
 @Service
 @Transactional(readOnly = true)
@@ -31,8 +30,12 @@ public class ItemService implements CreateItemUseCase, GetItemUseCase, UpdateIte
     private final DeleteItemPort deleteItemPort;
     private final Clock clock;
 
-    public ItemService(SaveItemPort saveItemPort, LoadItemPort loadItemPort, UpdateItemPort updateItemPort,
-                       DeleteItemPort deleteItemPort, Clock clock) {
+    public ItemService(
+            SaveItemPort saveItemPort,
+            LoadItemPort loadItemPort,
+            UpdateItemPort updateItemPort,
+            DeleteItemPort deleteItemPort,
+            Clock clock) {
         this.saveItemPort = saveItemPort;
         this.loadItemPort = loadItemPort;
         this.updateItemPort = updateItemPort;

@@ -1,5 +1,7 @@
 package com.example.template.item.application.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.example.template.item.application.port.in.ItemListResult;
 import com.example.template.item.application.port.in.ItemSearchResult;
 import com.example.template.item.application.port.in.ListItemsQuery;
@@ -8,15 +10,12 @@ import com.example.template.item.application.port.out.ItemPageResult;
 import com.example.template.item.application.port.out.ListItemsPort;
 import com.example.template.item.application.port.out.SearchItemsPort;
 import com.example.template.item.domain.Item;
-import org.junit.jupiter.api.Test;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.LongStream;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 class ItemSearchServiceTest {
 

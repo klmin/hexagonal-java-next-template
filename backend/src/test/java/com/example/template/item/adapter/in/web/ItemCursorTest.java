@@ -1,10 +1,10 @@
 package com.example.template.item.adapter.in.web;
 
-import com.example.template.common.error.DomainValidationException;
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import com.example.template.common.error.DomainValidationException;
+import org.junit.jupiter.api.Test;
 
 class ItemCursorTest {
 
@@ -26,7 +26,8 @@ class ItemCursorTest {
     @Test
     void rejectsTamperedCursor() {
         assertThatThrownBy(() -> ItemCursor.decode("not-base64!")).isInstanceOf(DomainValidationException.class);
-        assertThatThrownBy(() -> ItemCursor.decode(ItemCursor.encode(-1L))).isInstanceOf(DomainValidationException.class);
+        assertThatThrownBy(() -> ItemCursor.decode(ItemCursor.encode(-1L)))
+                .isInstanceOf(DomainValidationException.class);
         assertThatThrownBy(() -> ItemCursor.decode("YWJj")).isInstanceOf(DomainValidationException.class);
     }
 }

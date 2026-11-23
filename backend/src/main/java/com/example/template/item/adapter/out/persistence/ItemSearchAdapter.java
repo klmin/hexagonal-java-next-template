@@ -1,19 +1,17 @@
 package com.example.template.item.adapter.out.persistence;
 
+import static com.example.template.common.jooq.Tables.ITEMS;
+import static org.jooq.impl.DSL.noCondition;
+
+import com.example.template.common.jooq.tables.records.ItemsRecord;
 import com.example.template.item.application.port.out.ItemPageResult;
 import com.example.template.item.application.port.out.ListItemsPort;
 import com.example.template.item.application.port.out.SearchItemsPort;
 import com.example.template.item.domain.Item;
+import java.util.List;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-
-import com.example.template.common.jooq.tables.records.ItemsRecord;
-
-import static com.example.template.common.jooq.Tables.ITEMS;
-import static org.jooq.impl.DSL.noCondition;
 
 // 조회 전용. 저장/수정은 JPA(ItemPersistenceAdapter), 검색 같은 조회는 jOOQ
 @Component
@@ -53,6 +51,7 @@ class ItemSearchAdapter implements SearchItemsPort, ListItemsPort {
     }
 
     private static Item toDomain(ItemsRecord r) {
-        return Item.restore(r.getId(), r.getName(), r.getDescription(), r.getCreatedAt().toInstant());
+        return Item.restore(
+                r.getId(), r.getName(), r.getDescription(), r.getCreatedAt().toInstant());
     }
 }

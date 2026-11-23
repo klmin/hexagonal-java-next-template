@@ -1,7 +1,6 @@
 package com.example.template.item.adapter.in.web;
 
 import com.example.template.common.error.DomainValidationException;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -11,8 +10,7 @@ final class ItemCursor {
     private static final Base64.Encoder ENCODER = Base64.getUrlEncoder().withoutPadding();
     private static final Base64.Decoder DECODER = Base64.getUrlDecoder();
 
-    private ItemCursor() {
-    }
+    private ItemCursor() {}
 
     static String encode(Long id) {
         return id == null ? null : ENCODER.encodeToString(Long.toString(id).getBytes(StandardCharsets.UTF_8));

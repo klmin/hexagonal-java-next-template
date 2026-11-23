@@ -2,6 +2,8 @@ package com.example.template.common.web;
 
 import com.example.template.common.error.DomainValidationException;
 import com.example.template.common.error.NotFoundException;
+import java.util.List;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -17,9 +19,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import java.util.List;
-import java.util.stream.Stream;
 
 // 오류 응답은 RFC 9457 Problem Details 형식으로 통일
 @RestControllerAdvice
@@ -75,14 +74,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static Stream<FieldError> toFieldErrors(ParameterValidationResult result) {
         if (result instanceof ParameterErrors errors) {
-            return errors.getFieldErrors().stream()
-                    .map(e -> new FieldError(e.getField(), e.getDefaultMessage()));
+            return errors.getFieldErrors().stream().map(e -> new FieldError(e.getField(), e.getDefaultMessage()));
         }
         String name = result.getMethodParameter().getParameterName();
-        return result.getResolvableErrors().stream()
-                .map(e -> new FieldError(name, e.getDefaultMessage()));
+        return result.getResolvableErrors().stream().map(e -> new FieldError(name, e.getDefaultMessage()));
     }
 
-    record FieldError(String field, String message) {
-    }
+    record FieldError(String field, String message) {}
 }

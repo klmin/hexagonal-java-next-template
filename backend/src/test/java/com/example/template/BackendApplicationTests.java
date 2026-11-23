@@ -11,6 +11,5 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class BackendApplicationTests {
 
     @Test
-    void contextLoads() {
-    }
+    void contextLoads() {}
 }

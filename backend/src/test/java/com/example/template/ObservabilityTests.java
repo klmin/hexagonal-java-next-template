@@ -1,5 +1,7 @@
 package com.example.template;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +13,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.client.RestClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "management.server.port=0")
 @AutoConfigureMetrics
@@ -31,11 +31,17 @@ class ObservabilityTests {
 
     @Test
     void exposesPrometheusMetricsOnManagementPort() {
-        RestClient.create("http://localhost:" + port).get().uri("/api/items").retrieve().toBodilessEntity();
+        RestClient.create("http://localhost:" + port)
+                .get()
+                .uri("/api/items")
+                .retrieve()
+                .toBodilessEntity();
 
         String metrics = RestClient.create("http://localhost:" + managementPort)
-                .get().uri("/actuator/prometheus")
-                .retrieve().body(String.class);
+                .get()
+                .uri("/actuator/prometheus")
+                .retrieve()
+                .body(String.class);
 
         assertThat(metrics)
                 .contains("http_server_requests_seconds_bucket")

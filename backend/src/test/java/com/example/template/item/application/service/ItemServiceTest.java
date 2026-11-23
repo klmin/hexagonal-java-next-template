@@ -1,5 +1,8 @@
 package com.example.template.item.application.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.example.template.item.application.ItemNotFoundException;
 import com.example.template.item.application.port.in.CreateItemCommand;
 import com.example.template.item.application.port.in.UpdateItemCommand;
@@ -8,17 +11,13 @@ import com.example.template.item.application.port.out.LoadItemPort;
 import com.example.template.item.application.port.out.SaveItemPort;
 import com.example.template.item.application.port.out.UpdateItemPort;
 import com.example.template.item.domain.Item;
-import org.junit.jupiter.api.Test;
-
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.junit.jupiter.api.Test;
 
 class ItemServiceTest {
 
@@ -38,8 +37,7 @@ class ItemServiceTest {
 
     @Test
     void getItemThrowsWhenMissing() {
-        assertThatThrownBy(() -> service.getItem(99L))
-                .isInstanceOf(ItemNotFoundException.class);
+        assertThatThrownBy(() -> service.getItem(99L)).isInstanceOf(ItemNotFoundException.class);
     }
 
     @Test

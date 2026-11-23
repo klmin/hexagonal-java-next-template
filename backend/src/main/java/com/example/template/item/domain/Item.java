@@ -1,7 +1,6 @@
 package com.example.template.item.domain;
 
 import com.example.template.common.error.DomainValidationException;
-
 import java.time.Instant;
 import java.util.Objects;
 

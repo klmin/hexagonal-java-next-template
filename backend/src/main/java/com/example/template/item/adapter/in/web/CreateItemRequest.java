@@ -7,8 +7,7 @@ import jakarta.validation.constraints.Size;
 
 public record CreateItemRequest(
         @NotBlank @Size(max = Item.NAME_MAX_LENGTH) String name,
-        @Size(max = Item.DESCRIPTION_MAX_LENGTH) String description
-) {
+        @Size(max = Item.DESCRIPTION_MAX_LENGTH) String description) {
 
     CreateItemCommand toCommand() {
         return new CreateItemCommand(name, description);
