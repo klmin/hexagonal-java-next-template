@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
 import { isCursor, listItems, type ItemPage } from "@/lib/api/items";
 import { logError } from "@/lib/log";
 
@@ -23,7 +24,7 @@ export async function ItemList({
     unstable_rethrow(err);
     logError("ItemList failed", err);
     return (
-      <p className="text-sm text-red-600">
+      <p className="text-sm text-destructive">
         목록을 불러오지 못했습니다. 백엔드가 실행 중인지 확인해 주세요.
       </p>
     );
@@ -34,7 +35,7 @@ export async function ItemList({
   if (items.length === 0) {
     return (
       <div className="flex flex-col gap-3">
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-muted-foreground">
           {current ? "더 이상 항목이 없습니다." : "아직 항목이 없습니다."}
         </p>
         {current && <PageLinks nextCursor={null} />}
@@ -44,17 +45,19 @@ export async function ItemList({
 
   return (
     <div className="flex flex-col gap-3">
-      <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
+      <ul className="divide-y">
         {items.map((item) => (
           <li key={item.id} className="flex items-start justify-between gap-4 py-3">
             <div>
               <p className="font-medium">{item.name}</p>
-              {item.description && <p className="text-sm text-zinc-500">{item.description}</p>}
+              {item.description && (
+                <p className="text-sm text-muted-foreground">{item.description}</p>
+              )}
             </div>
-            <div className="flex shrink-0 items-center gap-3 text-sm">
-              <Link href={`/items/${item.id}/edit`} className="underline">
-                수정
-              </Link>
+            <div className="flex shrink-0 items-start gap-1">
+              <Button variant="ghost" size="sm" asChild>
+                <Link href={`/items/${item.id}/edit`}>수정</Link>
+              </Button>
               <DeleteItemButton id={item.id} name={item.name} />
             </div>
           </li>
@@ -77,16 +80,16 @@ function PageLinks({
     return null;
   }
   return (
-    <nav aria-label="페이지" className="flex gap-4 text-sm">
+    <nav aria-label="페이지" className="flex gap-2">
       {!isFirstPage && (
-        <Link href="/" className="underline">
-          처음으로
-        </Link>
+        <Button variant="outline" size="sm" asChild>
+          <Link href="/">처음으로</Link>
+        </Button>
       )}
       {nextCursor && (
-        <Link href={`/?${new URLSearchParams({ cursor: nextCursor })}`} className="underline">
-          다음
-        </Link>
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/?${new URLSearchParams({ cursor: nextCursor })}`}>다음</Link>
+        </Button>
       )}
     </nav>
   );

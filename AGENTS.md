@@ -8,7 +8,7 @@
 - `openapi/openapi.json` - API 계약. 백엔드 `./gradlew updateOpenApi`로 생성, 프론트 `npm run api:types`로 타입 생성
 - `docs/configuration.md` - 설정값 목록. 환경변수를 추가하거나 바꾸면 이 문서와 해당 `.env.example`도 같이 고친다
 - `infra/observability/` - 로컬 모니터링 스택 ([README](infra/observability/README.md))
-- `frontend/` - Next.js 16 (App Router, Cache Components), React 19, TypeScript, Tailwind 4 ([README](frontend/README.md), [AGENTS](frontend/AGENTS.md))
+- `frontend/` - Next.js 16 (App Router, Cache Components), React 19, TypeScript, Tailwind 4, shadcn/ui ([README](frontend/README.md), [AGENTS](frontend/AGENTS.md))
 
 ## 명령
 
@@ -76,6 +76,7 @@ common/jooq/                         jOOQ 생성 코드 (빌드 시 생성, 커�
 - 백엔드 호출은 서버에서만. `src/lib/api/client.ts`의 `request()`를 쓰고 기능별 파일(`items.ts` 등)에 함수를 둔다. `import "server-only"` 필수
 - 서버 환경변수는 `src/lib/env.ts`(zod)에 추가하고 `serverEnv()`로 읽는다
 - 캐시하지 않는 데이터를 읽는 서버 컴포넌트는 `<Suspense>` 안에 둔다 (아니면 `next build` 실패)
+- UI는 `src/components/ui/`의 shadcn/ui 컴포넌트를 쓴다. 추가는 `npx shadcn@latest add <이름>`. 색은 테마 토큰(`text-muted-foreground` 등)
 - 변경은 Server Action + `useActionState`. 성공하면 `refresh()`(`next/cache`). 예상 가능한 오류는 throw 말고 상태로 반환
 - `next lint`는 없다. `npm run lint` 사용. 포맷은 Prettier(`npm run format`)
 - 테스트는 Vitest(`npm test`), 대상 파일 옆에 `*.test.ts(x)`. async 서버 컴포넌트와 화면 흐름은 Playwright(`e2e/`)로 확인

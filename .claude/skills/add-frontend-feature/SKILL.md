@@ -36,7 +36,10 @@ Next.js 16은 이전 버전과 API가 다르다. 쓰려는 기능의 문서를 `
 
 ## 4. 규칙
 - 브라우저에서 백엔드를 직접 호출하지 않는다. 서버 전용 값을 `NEXT_PUBLIC_`으로 만들지 않는다.
-- 스타일은 Tailwind 유틸리티 클래스, 다크 모드는 `dark:` 변형을 같이 쓴다.
+- UI는 `src/components/ui/`의 shadcn/ui 컴포넌트(Button, Input, Label, Textarea, Card)를 먼저 쓴다. 없는 컴포넌트는 `cd frontend && npx shadcn@latest add <이름>`으로 추가한다.
+- 링크를 버튼 모양으로 보이게 하려면 `<Button asChild><Link .../></Button>`을 쓴다.
+- 입력은 `useId()`로 id를 만들어 `<Label htmlFor>`와 연결한다 (`create-item-form.tsx` 참고). 테스트가 `getByLabelText`로 찾는다.
+- 색은 `zinc-500` 같은 고정 색 대신 테마 토큰(`text-muted-foreground`, `text-destructive`, `bg-primary` 등)을 쓴다. 다크 모드는 토큰이 OS 설정에 맞게 바뀐다(`globals.css`).
 
 ## 5. 테스트
 - 클라이언트 컴포넌트, 유틸은 Vitest로 (`create-item-form.test.tsx`, `client.test.ts` 참고). Server Action은 `vi.mock`으로 대체한다.

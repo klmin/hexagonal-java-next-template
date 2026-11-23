@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 
+import { Button } from "@/components/ui/button";
+
 import { deleteItemAction, type DeleteItemState } from "./actions";
 
 const initialState: DeleteItemState = {};
@@ -14,16 +16,18 @@ export function DeleteItemButton({ id, name }: { id: number; name: string }) {
 
   return (
     <form action={formAction} className="flex flex-col items-end gap-1">
-      <button
+      <Button
         type="submit"
+        variant="ghost"
+        size="sm"
         disabled={pending}
         aria-label={`${name} 삭제`}
-        className="text-red-600 underline disabled:opacity-50"
+        className="text-destructive hover:text-destructive"
       >
         {pending ? "삭제 중..." : "삭제"}
-      </button>
+      </Button>
       {state.error && (
-        <p role="alert" className="text-xs text-red-600">
+        <p role="alert" className="text-xs text-destructive">
           {state.error}
         </p>
       )}

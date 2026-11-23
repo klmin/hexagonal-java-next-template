@@ -1,6 +1,6 @@
 # frontend
 
-Next.js 16 (App Router, Cache Components) / React 19 / TypeScript / Tailwind 4
+Next.js 16 (App Router, Cache Components) / React 19 / TypeScript / Tailwind 4 / shadcn/ui
 
 ## 실행
 
@@ -55,6 +55,18 @@ import type { components } from "./schema";
 type Item = components["schemas"]["ItemResponse"];
 ```
 
+## UI 컴포넌트
+
+[shadcn/ui](https://ui.shadcn.com)(Radix, new-york 스타일)를 쓴다. 컴포넌트는 패키지가 아니라 코드로 `src/components/ui/`에 들어 있어서 직접 고쳐도 된다.
+
+```bash
+npx shadcn@latest add dialog   # 필요한 컴포넌트만 추가
+```
+
+- 설정은 `components.json`, 테마 색은 `src/app/globals.css`의 CSS 변수
+- 다크 모드는 OS 설정(`prefers-color-scheme`)을 따른다. 화면에서 직접 바꾸게 하려면 `next-themes`를 넣고 `@custom-variant dark`를 `.dark` 클래스 방식으로 바꾼다
+- `global-error.tsx`는 앱 전체가 깨졌을 때 뜨는 화면이라 컴포넌트를 쓰지 않는다
+
 ## Docker
 
 ```bash
@@ -78,7 +90,9 @@ src/
 │       └── [id]/edit/
 │           ├── page.tsx         # 동적 경로. params 를 Suspense 안에서 await
 │           └── edit-item-form.tsx
+├── components/ui/               # shadcn/ui 컴포넌트 (npx shadcn add 로 추가)
 ├── lib/
+│   ├── utils.ts                 # cn() (shadcn)
 │   ├── env.ts                   # 서버 환경변수 검증 (zod)
 │   └── api/
 │       ├── client.ts            # fetch 공통 (타임아웃, Problem Details -> ApiError)
