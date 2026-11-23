@@ -32,7 +32,9 @@ com.example.template
 ```bash
 ./gradlew bootRun       # compose.yaml의 PostgreSQL 자동 기동 (Docker 필요)
 ./gradlew bootTestRun   # Testcontainers로 DB 띄워서 실행
-./gradlew build         # 테스트 + ArchUnit 포함
+./gradlew build         # 테스트 + ArchUnit + 포맷 검사
+./gradlew spotlessApply # 포맷 자동 수정 (자바 palantir-java-format, build.gradle.kts ktlint)
+# IntelliJ 에 palantir-java-format 플러그인을 설치하고 켜면 Reformat Code 가 같은 결과를 낸다
 ```
 
 빌드에는 Docker가 필요하다. jOOQ 코드를 만들 때 임시 PostgreSQL 컨테이너를 쓰기 때문이다([JPA와 jOOQ](#jpa와-jooq)).
