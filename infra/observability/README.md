@@ -30,6 +30,11 @@ docker compose up -d
 
 메트릭은 항상 켜져 있다. 트레이스와 로그 파일은 환경변수로 켠다.
 
+메트릭은 Alloy가 가져가고(pull), 트레이스는 앱이 보낸다(push).
+`spring-boot-starter-opentelemetry`에는 OTLP 메트릭 전송기도 들어 있어서 그대로 두면 앱이 메트릭을 `:4318/v1/metrics`로도 보내려고 한다.
+같은 메트릭을 두 번 처리하지 않게 `application.yml`에서 `management.otlp.metrics.export.enabled: false`로 꺼 두었다.
+push로 바꾸려면 이 값을 켜고, Alloy의 `otelcol.receiver.otlp` 출력에 `metrics`를 연결한 뒤 `prometheus.scrape`를 뺀다.
+
 ```bash
 cd backend
 OTLP_TRACING_ENABLED=true LOG_FILE=logs/backend.log ./gradlew bootRun
