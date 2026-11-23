@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { Card, CardContent } from "@/components/ui/card";
 import { ApiError } from "@/lib/api/client";
 import { getItem, type Item } from "@/lib/api/items";
 
@@ -11,7 +12,7 @@ export default function EditItemPage({ params }: PageProps<"/items/[id]/edit">) 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-col gap-8 px-4 py-12">
       <h1 className="text-2xl font-semibold">항목 수정</h1>
-      <Suspense fallback={<p className="text-sm text-zinc-500">불러오는 중...</p>}>
+      <Suspense fallback={<p className="text-sm text-muted-foreground">불러오는 중...</p>}>
         <EditItem params={params} />
       </Suspense>
     </main>
@@ -25,7 +26,14 @@ async function EditItem({ params }: { params: Promise<{ id: string }> }) {
     notFound();
   }
 
-  return <EditItemForm item={await loadItem(itemId)} />;
+  const item = await loadItem(itemId);
+  return (
+    <Card>
+      <CardContent>
+        <EditItemForm item={item} />
+      </CardContent>
+    </Card>
+  );
 }
 
 async function loadItem(id: number): Promise<Item> {

@@ -1,62 +1,60 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useId } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import type { Item } from "@/lib/api/items";
 
 import { updateItemAction, type UpdateItemState } from "../../actions";
 
 const initialState: UpdateItemState = {};
 
-const fieldClass =
-  "rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900 aria-invalid:border-red-600";
-
 export function EditItemForm({ item }: { item: Item }) {
   const [state, formAction, pending] = useActionState(
     updateItemAction.bind(null, item.id),
     initialState,
   );
-  const errorId = "edit-item-error";
+  const id = useId();
+  const errorId = `${id}-error`;
 
   return (
-    <form action={formAction} className="flex flex-col gap-3">
-      <label className="flex flex-col gap-1 text-sm">
-        이름
-        <input
+    <form action={formAction} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <Label htmlFor={`${id}-name`}>이름</Label>
+        <Input
+          id={`${id}-name`}
           name="name"
           maxLength={100}
           required
           defaultValue={state.values?.name ?? item.name}
           aria-invalid={state.error ? true : undefined}
           aria-describedby={state.error ? errorId : undefined}
-          className={fieldClass}
         />
-      </label>
-      <label className="flex flex-col gap-1 text-sm">
-        설명 (선택)
-        <textarea
+      </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor={`${id}-description`}>설명 (선택)</Label>
+        <Textarea
+          id={`${id}-description`}
           name="description"
           maxLength={500}
           rows={2}
           defaultValue={state.values?.description ?? item.description ?? ""}
-          className={fieldClass}
         />
-      </label>
-      <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded bg-zinc-900 px-4 py-2 text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-        >
+      </div>
+      <div className="flex items-center gap-2">
+        <Button type="submit" disabled={pending}>
           {pending ? "저장 중..." : "저장"}
-        </button>
-        <Link href="/" className="text-sm underline">
-          취소
-        </Link>
+        </Button>
+        <Button variant="ghost" asChild>
+          <Link href="/">취소</Link>
+        </Button>
       </div>
       {state.error && (
-        <p id={errorId} role="alert" className="text-sm text-red-600">
+        <p id={errorId} role="alert" className="text-sm text-destructive">
           {state.error}
         </p>
       )}
