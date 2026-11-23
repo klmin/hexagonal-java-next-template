@@ -1,8 +1,7 @@
 package com.example.template.item.adapter.out.persistence;
 
 import com.example.template.TestcontainersConfiguration;
-import com.example.template.item.application.port.in.ItemSearchResult;
-import com.example.template.item.application.port.in.SearchItemsQuery;
+import com.example.template.item.application.port.out.ItemPageResult;
 import com.example.template.item.domain.Item;
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +43,7 @@ class ItemSearchAdapterTest {
 
     @Test
     void searchesByKeywordIgnoringCase() {
-        ItemSearchResult result = adapter.search(new SearchItemsQuery("NOTE", 0, 20));
+        ItemPageResult result = adapter.search("NOTE", 0, 20);
 
         assertThat(result.items()).extracting(Item::name).containsExactly("Notebook Stand");
         assertThat(result.totalCount()).isEqualTo(1);
@@ -52,8 +51,8 @@ class ItemSearchAdapterTest {
 
     @Test
     void pagesNewestFirst() {
-        ItemSearchResult first = adapter.search(new SearchItemsQuery(null, 0, 3));
-        ItemSearchResult second = adapter.search(new SearchItemsQuery(null, 1, 3));
+        ItemPageResult first = adapter.search(null, 0, 3);
+        ItemPageResult second = adapter.search(null, 3, 3);
 
         assertThat(first.totalCount()).isEqualTo(4);
         assertThat(first.items()).extracting(Item::name).containsExactly("Notebook Stand", "마우스", "노트");

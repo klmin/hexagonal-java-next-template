@@ -6,6 +6,7 @@ import com.example.template.item.application.port.in.ListItemsQuery;
 import com.example.template.item.application.port.in.ListItemsUseCase;
 import com.example.template.item.application.port.in.SearchItemsQuery;
 import com.example.template.item.application.port.in.SearchItemsUseCase;
+import com.example.template.item.application.port.out.ItemPageResult;
 import com.example.template.item.application.port.out.ListItemsPort;
 import com.example.template.item.application.port.out.SearchItemsPort;
 import com.example.template.item.domain.Item;
@@ -39,6 +40,7 @@ public class ItemSearchService implements SearchItemsUseCase, ListItemsUseCase {
 
     @Override
     public ItemSearchResult search(SearchItemsQuery query) {
-        return searchItemsPort.search(query);
+        ItemPageResult page = searchItemsPort.search(query.keyword(), (long) query.page() * query.size(), query.size());
+        return new ItemSearchResult(page.items(), page.totalCount(), query.page(), query.size());
     }
 }
