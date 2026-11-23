@@ -1,8 +1,12 @@
 package com.example.template.item.application.service;
 
 import com.example.template.item.application.port.in.ItemListResult;
+import com.example.template.item.application.port.in.ItemSearchResult;
 import com.example.template.item.application.port.in.ListItemsQuery;
+import com.example.template.item.application.port.in.SearchItemsQuery;
+import com.example.template.item.application.port.out.ItemPageResult;
 import com.example.template.item.application.port.out.ListItemsPort;
+import com.example.template.item.application.port.out.SearchItemsPort;
 import com.example.template.item.domain.Item;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +31,25 @@ class ItemSearchServiceTest {
             .map(id -> Item.restore(id, "item-" + id, null, NOW))
             .toList();
 
-    private final ItemSearchService service = new ItemSearchService((query) -> null, store);
+    // 받은 인자를 기록하고 고정된 결과를 돌려준다
+    private final List<String> searchCalls = new ArrayList<>();
+    private final SearchItemsPort searchPort = (keyword, offset, limit) -> {
+        searchCalls.add(keyword + "/" + offset + "/" + limit);
+        return new ItemPageResult(List.of(Item.restore(1L, "노트북", null, NOW)), 7);
+    };
+
+    private final ItemSearchService service = new ItemSearchService(searchPort, store);
+
+    @Test
+    void searchConvertsPageToOffsetAndKeepsPageInfo() {
+        ItemSearchResult result = service.search(new SearchItemsQuery("  노트 ", 2, 3));
+
+        assertThat(searchCalls).containsExactly("노트/6/3");
+        assertThat(result.items()).extracting(Item::name).containsExactly("노트북");
+        assertThat(result.totalCount()).isEqualTo(7);
+        assertThat(result.page()).isEqualTo(2);
+        assertThat(result.size()).isEqualTo(3);
+    }
 
     @Test
     void firstPageReturnsNewestAndNextCursor() {

@@ -1,7 +1,6 @@
 package com.example.template.item.adapter.out.persistence;
 
-import com.example.template.item.application.port.in.ItemSearchResult;
-import com.example.template.item.application.port.in.SearchItemsQuery;
+import com.example.template.item.application.port.out.ItemPageResult;
 import com.example.template.item.application.port.out.ListItemsPort;
 import com.example.template.item.application.port.out.SearchItemsPort;
 import com.example.template.item.domain.Item;
@@ -38,21 +37,19 @@ class ItemSearchAdapter implements SearchItemsPort, ListItemsPort {
     }
 
     @Override
-    public ItemSearchResult search(SearchItemsQuery query) {
-        Condition condition = query.keyword() == null
-                ? noCondition()
-                : ITEMS.NAME.containsIgnoreCase(query.keyword());
+    public ItemPageResult search(String keyword, long offset, int limit) {
+        Condition condition = keyword == null ? noCondition() : ITEMS.NAME.containsIgnoreCase(keyword);
 
         List<Item> items = dsl.selectFrom(ITEMS)
                 .where(condition)
                 .orderBy(ITEMS.ID.desc())
-                .limit(query.size())
-                .offset((long) query.page() * query.size())
+                .limit(limit)
+                .offset(offset)
                 .fetch(ItemSearchAdapter::toDomain);
 
         long total = dsl.fetchCount(ITEMS, condition);
 
-        return new ItemSearchResult(items, total, query.page(), query.size());
+        return new ItemPageResult(items, total);
     }
 
     private static Item toDomain(ItemsRecord r) {
