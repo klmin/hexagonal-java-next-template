@@ -4,7 +4,7 @@
 
 ## 구성
 
-- `backend/` - Spring Boot 4.1, Java 25, Gradle(Kotlin DSL), PostgreSQL, Flyway ([README](backend/README.md))
+- `backend/` - Spring Boot 4.2, Java 25, Gradle(Kotlin DSL), PostgreSQL, Flyway ([README](backend/README.md))
 - `openapi/openapi.json` - API 계약. 백엔드 `./gradlew updateOpenApi`로 생성, 프론트 `npm run api:types`로 타입 생성
 - `docs/configuration.md` - 설정값 목록. 환경변수를 추가하거나 바꾸면 이 문서와 해당 `.env.example`도 같이 고친다
 - `infra/observability/` - 로컬 모니터링 스택 ([README](infra/observability/README.md))
