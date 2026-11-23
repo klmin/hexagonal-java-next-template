@@ -16,7 +16,7 @@ import { parseArgs } from "node:util";
 
 const OLD_PACKAGE = "com.example.template";
 const OLD_GROUP = "com.example";
-const OLD_NAME = "hexagonal-spring-next-template";
+const OLD_NAME = "hexagonal-java-next-template";
 
 const { values } = parseArgs({
   options: {
