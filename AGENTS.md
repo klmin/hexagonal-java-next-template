@@ -7,6 +7,7 @@
 - `backend/` - Spring Boot 4.2, Java 25, Gradle(Kotlin DSL), PostgreSQL, Flyway ([README](backend/README.md))
 - `openapi/openapi.json` - API 계약. 백엔드 `./gradlew updateOpenApi`로 생성, 프론트 `npm run api:types`로 타입 생성
 - `docs/configuration.md` - 설정값 목록. 환경변수를 추가하거나 바꾸면 이 문서와 해당 `.env.example`도 같이 고친다
+- `docs/authentication.md` - 인증을 붙일 때 무엇을 어디에 두는지 (템플릿에는 인증 코드 없음)
 - `infra/observability/` - 로컬 모니터링 스택 ([README](infra/observability/README.md))
 - `frontend/` - Next.js 16 (App Router, Cache Components), React 19, TypeScript, Tailwind 4, shadcn/ui ([README](frontend/README.md), [AGENTS](frontend/AGENTS.md))
 
@@ -51,6 +52,7 @@ common/jooq/                         jOOQ 생성 코드 (빌드 시 생성, 커�
 - 다른 기능은 그 기능의 `application.port.in`과 `domain`으로만 접근. 기능 간 순환 참조 금지
 - `common`은 특정 기능을 참조하지 않는다
 - jOOQ(`org.jooq`, `common.jooq`)는 adapter.out에서만 사용
+- Spring Security는 application, domain에서 사용 금지. 인증 정보는 adapter.in에서 꺼내 Command에 사용자 id로 넘긴다
 
 그 외:
 

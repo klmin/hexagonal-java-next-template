@@ -110,6 +110,11 @@ jOOQ 코드는 커밋하지 않고 빌드할 때 만든다.
 
 스택 띄우는 법과 변수는 [infra/observability](../infra/observability/README.md).
 
+## 인증
+
+템플릿에는 인증이 없다. 붙일 때는 [docs/authentication.md](../docs/authentication.md)를 따른다.
+인증 정보는 adapter.in에서 꺼내 Command에 사용자 id로 넘기고, 서비스와 도메인은 Spring Security를 모른다 (`HexagonalArchitectureTest`가 검사).
+
 ## API 문서
 
 - Swagger UI: http://localhost:8080/swagger-ui.html
