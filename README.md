@@ -7,6 +7,7 @@ Spring Boot(헥사고날) 백엔드 + Next.js 프론트엔드 모노레포 템�
 - `frontend/` - Next.js 16, React 19, TypeScript, Tailwind 4
 - `compose.yaml` - 전체 스택을 이미지로 실행 (E2E, 로컬 확인)
 - `docs/configuration.md` - 설정값 (환경변수, .env)
+- `docs/authentication.md` - 인증을 붙일 때 위치 규칙 (인증 코드는 없음)
 - `openapi/` - API 스펙 (백엔드에서 생성, 프론트 타입 생성에 사용)
 - `infra/observability/` - 모니터링 스택 (Prometheus, Loki, Tempo, Grafana, Alloy)
 - `.github/` - CI, CodeQL, Dependabot, PR/이슈 템플릿

@@ -47,6 +47,14 @@ class HexagonalArchitectureTest {
             .should().dependOnClassesThat().resideInAnyPackage(
                     "org.springframework.web..", "org.springframework.data..", "jakarta.persistence..", "org.jooq..");
 
+    // 인증 정보(SecurityContextHolder, Authentication, Jwt 등)는 adapter.in 에서 꺼내 Command 에 사용자 id 로 넘긴다.
+    // 서비스와 도메인은 Spring Security 를 모른다 (docs/authentication.md). domain 은 위 domainIsFrameworkFree 가 막는다
+    @ArchTest
+    static final ArchRule applicationDoesNotUseSecurity = noClasses()
+            .that().resideInAPackage("..application..")
+            .should().dependOnClassesThat().resideInAPackage("org.springframework.security..")
+            .because("인증 정보는 adapter.in 에서 꺼내 Command 로 넘긴다 (docs/authentication.md)");
+
     @ArchTest
     static final ArchRule inboundAdaptersDoNotUseOutbound = noClasses()
             .that().resideInAPackage("..adapter.in..")
