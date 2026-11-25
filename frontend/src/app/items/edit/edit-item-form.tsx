@@ -1,21 +1,32 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useActionState, useId } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { Item } from "@/lib/api/items";
+import { itemKeys, type Item } from "@/lib/api/items";
 
-import { updateItemAction, type UpdateItemState } from "../../actions";
+import { submitUpdateItem, type ItemFormState } from "../actions";
 
-const initialState: UpdateItemState = {};
+const initialState: ItemFormState = {};
 
 export function EditItemForm({ item }: { item: Item }) {
+  const queryClient = useQueryClient();
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(
-    updateItemAction.bind(null, item.id),
+    async (_prev: ItemFormState, formData: FormData) => {
+      const result = await submitUpdateItem(item.id, formData);
+      if (result.ok) {
+        await queryClient.invalidateQueries({ queryKey: itemKeys.all });
+        router.push("/");
+      }
+      return result;
+    },
     initialState,
   );
   const id = useId();

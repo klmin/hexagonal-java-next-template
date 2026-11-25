@@ -1,86 +1,60 @@
-"use server";
+// 폼 제출 처리 (브라우저에서 실행). 컴포넌트가 useActionState 로 연결하고, 성공하면 쿼리를 무효화한다.
+// 예상 가능한 오류(입력 오류, 백엔드 오류 응답)는 throw 하지 않고 상태로 돌려준다
 
-import { refresh } from "next/cache";
-import { redirect } from "next/navigation";
-
-import { ApiError } from "@/lib/api/client";
+import { ApiError, errorMessage } from "@/lib/api/client";
 import { createItem, deleteItem, isItemId, updateItem } from "@/lib/api/items";
-import { logError } from "@/lib/log";
 
-export type CreateItemState = {
+export type ItemFormState = {
+  ok?: boolean;
   error?: string;
   // 실패했을 때 입력값을 다시 채우기 위한 값. 폼 액션이 끝나면 React가 폼을 비우기 때문
   values?: { name: string; description: string };
 };
 
-export async function createItemAction(
-  _prev: CreateItemState,
-  formData: FormData,
-): Promise<CreateItemState> {
-  const name = String(formData.get("name") ?? "").trim();
-  const description = String(formData.get("description") ?? "").trim();
-  const values = { name, description };
+function readForm(formData: FormData) {
+  return {
+    name: String(formData.get("name") ?? "").trim(),
+    description: String(formData.get("description") ?? "").trim(),
+  };
+}
 
-  if (!name) {
+export async function submitCreateItem(formData: FormData): Promise<ItemFormState> {
+  const values = readForm(formData);
+  if (!values.name) {
     return { error: "이름을 입력해 주세요.", values };
   }
 
   try {
-    await createItem({ name, description: description || undefined });
+    await createItem({ name: values.name, description: values.description || undefined });
   } catch (e) {
-    if (e instanceof ApiError) {
-      return { error: e.message, values };
-    }
-    logError("createItemAction failed", e);
-    return { error: "백엔드에 연결할 수 없습니다.", values };
+    return { error: errorMessage(e), values };
   }
-
-  // 새 항목은 최신순 첫 페이지에 나온다. 다음 페이지(?cursor=)를 보고 있었어도 첫 페이지로 돌아가야 보인다
-  redirect("/");
+  return { ok: true };
 }
 
-export type UpdateItemState = CreateItemState;
-
-// 폼에서 bind 로 id 를 넘긴다: updateItemAction.bind(null, id)
-export async function updateItemAction(
-  id: number,
-  _prev: UpdateItemState,
-  formData: FormData,
-): Promise<UpdateItemState> {
-  const name = String(formData.get("name") ?? "").trim();
-  const description = String(formData.get("description") ?? "").trim();
-  const values = { name, description };
-
+export async function submitUpdateItem(id: number, formData: FormData): Promise<ItemFormState> {
+  const values = readForm(formData);
   if (!isItemId(id)) {
     return { error: "잘못된 요청입니다.", values };
   }
-  if (!name) {
+  if (!values.name) {
     return { error: "이름을 입력해 주세요.", values };
   }
 
   try {
-    await updateItem(id, { name, description: description || undefined });
+    await updateItem(id, { name: values.name, description: values.description || undefined });
   } catch (e) {
-    if (e instanceof ApiError) {
-      return { error: e.message, values };
-    }
-    logError("updateItemAction failed", e);
-    return { error: "백엔드에 연결할 수 없습니다.", values };
+    return { error: errorMessage(e), values };
   }
-
-  // redirect 는 예외로 동작하므로 try 밖에서 부른다
-  redirect("/");
+  return { ok: true };
 }
 
 export type DeleteItemState = {
+  ok?: boolean;
   error?: string;
 };
 
-// 실패해도 목록 화면을 유지하고 오류를 상태로 돌려준다 (deleteItemAction.bind(null, id))
-export async function deleteItemAction(
-  id: number,
-  _prev: DeleteItemState,
-): Promise<DeleteItemState> {
+export async function submitDeleteItem(id: number): Promise<DeleteItemState> {
   if (!isItemId(id)) {
     return { error: "잘못된 요청입니다." };
   }
@@ -90,14 +64,8 @@ export async function deleteItemAction(
   } catch (e) {
     // 이미 지워졌으면 성공으로 보고 목록만 새로 그린다
     if (!(e instanceof ApiError && e.status === 404)) {
-      if (e instanceof ApiError) {
-        return { error: e.message };
-      }
-      logError("deleteItemAction failed", e);
-      return { error: "삭제하지 못했습니다. 백엔드에 연결할 수 없습니다." };
+      return { error: errorMessage(e, "삭제하지 못했습니다. 백엔드에 연결할 수 없습니다.") };
     }
   }
-
-  refresh();
-  return {};
+  return { ok: true };
 }
