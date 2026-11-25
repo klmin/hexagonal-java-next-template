@@ -50,6 +50,7 @@ test("항목을 수정하면 목록에 바뀐 이름이 보인다", async ({ pag
   const editPage = page.getByRole("main").filter({
     has: page.getByRole("heading", { name: "항목 수정" }),
   });
+  await expect(page).toHaveURL(/\/items\/edit\?id=\d+$/);
   await expect(editPage).toBeVisible();
   await expect(editPage.getByLabel("이름")).toHaveValue(name);
   await editPage.getByLabel("이름").fill(renamed);
@@ -78,17 +79,29 @@ test("항목을 삭제하면 목록에서 사라진다", async ({ page }) => {
   await expect(page.getByText(name)).toHaveCount(0);
 });
 
-test("없는 항목의 수정 화면은 404를 보여 준다", async ({ page }) => {
-  await page.goto("/items/999999999/edit");
+test("없는 항목의 수정 화면은 찾을 수 없다고 보여 준다", async ({ page }) => {
+  await page.goto("/items/edit?id=999999999");
 
   await expect(page.getByText("페이지를 찾을 수 없습니다")).toBeVisible();
 });
 
+test("수정 화면의 id가 숫자가 아니면 백엔드를 부르지 않는다", async ({ page }) => {
+  const apiCalls: string[] = [];
+  page.on("request", (req) => {
+    if (new URL(req.url()).pathname.startsWith("/api/")) apiCalls.push(req.url());
+  });
+
+  await page.goto("/items/edit?id=1/../../actuator");
+
+  await expect(page.getByText("페이지를 찾을 수 없습니다")).toBeVisible();
+  expect(apiCalls).toEqual([]);
+});
+
 test("목록은 20개씩 나오고 다음 페이지로 이어진다", async ({ page, request }) => {
-  const apiUrl = process.env.E2E_API_URL ?? "http://localhost:8080";
+  // 화면과 같은 오리진의 /api 로 만든다 (nginx 또는 개발 서버가 백엔드로 넘긴다)
   const prefix = `e2e-page-${Date.now()}`;
   for (let i = 1; i <= 21; i++) {
-    const res = await request.post(`${apiUrl}/api/items`, {
+    const res = await request.post("/api/items", {
       data: { name: `${prefix}-${String(i).padStart(2, "0")}` },
     });
     expect(res.status()).toBe(201);

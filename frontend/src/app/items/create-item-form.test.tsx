@@ -1,29 +1,44 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { renderWithQuery } from "@/test/render";
 
 import { CreateItemForm } from "./create-item-form";
 
-const createItemAction = vi.fn();
+const submitCreateItem = vi.fn();
+const push = vi.fn();
+let searchParams = new URLSearchParams();
 
 vi.mock("./actions", () => ({
-  createItemAction: (...args: unknown[]) => createItemAction(...args),
+  submitCreateItem: (...args: unknown[]) => submitCreateItem(...args),
 }));
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push }),
+  useSearchParams: () => searchParams,
+}));
+
+beforeEach(() => {
+  submitCreateItem.mockReset();
+  push.mockReset();
+  searchParams = new URLSearchParams();
+});
+
 describe("CreateItemForm", () => {
-  it("서버 액션이 돌려준 오류를 보여 주고 입력값을 유지한다", async () => {
-    createItemAction.mockResolvedValue({
+  it("실패하면 오류를 보여 주고 입력값을 유지한다", async () => {
+    submitCreateItem.mockResolvedValue({
       error: "이미 있는 이름입니다.",
       values: { name: "노트북", description: "회사용" },
     });
-    render(<CreateItemForm />);
+    renderWithQuery(<CreateItemForm />);
 
     await userEvent.type(screen.getByLabelText("이름"), "노트북");
     await userEvent.type(screen.getByLabelText("설명 (선택)"), "회사용");
     await userEvent.click(screen.getByRole("button", { name: "추가" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("이미 있는 이름입니다.");
-    const formData = createItemAction.mock.calls[0][1] as FormData;
+    const formData = submitCreateItem.mock.calls[0][0] as FormData;
     expect(formData.get("name")).toBe("노트북");
 
     const name = screen.getByLabelText("이름");
@@ -33,14 +48,29 @@ describe("CreateItemForm", () => {
     expect(name).toHaveAccessibleDescription("이미 있는 이름입니다.");
   });
 
-  it("성공하면 입력값을 비운다", async () => {
-    createItemAction.mockResolvedValue({});
-    render(<CreateItemForm />);
+  it("성공하면 입력값을 비우고 목록을 다시 불러온다", async () => {
+    submitCreateItem.mockResolvedValue({ ok: true });
+    const { queryClient } = renderWithQuery(<CreateItemForm />);
+    const invalidate = vi.spyOn(queryClient, "invalidateQueries");
 
     await userEvent.type(screen.getByLabelText("이름"), "노트북");
     await userEvent.click(screen.getByRole("button", { name: "추가" }));
 
     await vi.waitFor(() => expect(screen.getByLabelText("이름")).toHaveValue(""));
     expect(screen.queryByRole("alert")).toBeNull();
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["items"] });
+    // 첫 페이지에서는 이동하지 않는다
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("다음 페이지에서 추가하면 첫 페이지로 이동한다", async () => {
+    submitCreateItem.mockResolvedValue({ ok: true });
+    searchParams = new URLSearchParams({ cursor: "abc" });
+    renderWithQuery(<CreateItemForm />);
+
+    await userEvent.type(screen.getByLabelText("이름"), "노트북");
+    await userEvent.click(screen.getByRole("button", { name: "추가" }));
+
+    await vi.waitFor(() => expect(push).toHaveBeenCalledWith("/"));
   });
 });

@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CreateItemForm } from "./items/create-item-form";
 import { ItemList } from "./items/item-list";
 
-export default function Home({ searchParams }: PageProps<"/">) {
+export default function Home() {
   return (
     <main className="mx-auto flex w-full max-w-xl flex-col gap-8 px-4 py-12">
       <header>
@@ -15,24 +15,24 @@ export default function Home({ searchParams }: PageProps<"/">) {
         </p>
       </header>
 
-      <Card>
-        <CardContent>
-          <CreateItemForm />
-        </CardContent>
-      </Card>
+      {/* 폼과 목록은 ?cursor= 를 읽는다(useSearchParams). 정적 export 빌드 조건이라 Suspense 로 감싼다 */}
+      <Suspense
+        fallback={
+          <p role="status" className="text-sm text-muted-foreground">
+            불러오는 중...
+          </p>
+        }
+      >
+        <Card>
+          <CardContent>
+            <CreateItemForm />
+          </CardContent>
+        </Card>
 
-      <section>
-        <Suspense
-          fallback={
-            <p role="status" className="text-sm text-muted-foreground">
-              불러오는 중...
-            </p>
-          }
-        >
-          {/* searchParams 는 요청 시점 데이터라 Suspense 안의 ItemList 에서 await 한다 */}
-          <ItemList searchParams={searchParams} />
-        </Suspense>
-      </section>
+        <section>
+          <ItemList />
+        </section>
+      </Suspense>
     </main>
   );
 }

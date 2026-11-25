@@ -8,7 +8,7 @@ const eslintConfig = defineConfig([
   ...nextTs,
   prettier,
   {
-    // 쓰지 않는 인자는 _ 로 시작하게 해서 표시한다 (예: Server Action 의 _prev)
+    // 쓰지 않는 인자는 _ 로 시작하게 해서 표시한다 (예: useActionState 액션의 _prev)
     rules: {
       "@typescript-eslint/no-unused-vars": [
         "warn",

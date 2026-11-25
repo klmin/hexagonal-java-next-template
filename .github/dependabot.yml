@@ -32,7 +32,7 @@ updates:
     schedule:
       interval: weekly
 
-  # Dockerfile, compose 이미지 태그 (postgres, eclipse-temurin, node, 모니터링 스택)
+  # Dockerfile, compose 이미지 태그 (postgres, eclipse-temurin, node, nginx, 모니터링 스택)
   - package-ecosystem: docker
     directories: ['/backend', '/frontend']
     schedule:
