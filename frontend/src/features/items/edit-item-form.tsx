@@ -1,9 +1,6 @@
-"use client";
-
 import { useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useActionState, useId } from "react";
+import { Link, useNavigate } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,19 +8,19 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { itemKeys, type Item } from "@/lib/api/items";
 
-import { submitUpdateItem, type ItemFormState } from "../actions";
+import { submitUpdateItem, type ItemFormState } from "./actions";
 
 const initialState: ItemFormState = {};
 
 export function EditItemForm({ item }: { item: Item }) {
   const queryClient = useQueryClient();
-  const router = useRouter();
+  const navigate = useNavigate();
   const [state, formAction, pending] = useActionState(
     async (_prev: ItemFormState, formData: FormData) => {
       const result = await submitUpdateItem(item.id, formData);
       if (result.ok) {
         await queryClient.invalidateQueries({ queryKey: itemKeys.all });
-        router.push("/");
+        navigate("/");
       }
       return result;
     },
@@ -61,7 +58,7 @@ export function EditItemForm({ item }: { item: Item }) {
           {pending ? "저장 중..." : "저장"}
         </Button>
         <Button variant="ghost" asChild>
-          <Link href="/">취소</Link>
+          <Link to="/">취소</Link>
         </Button>
       </div>
       {state.error && (

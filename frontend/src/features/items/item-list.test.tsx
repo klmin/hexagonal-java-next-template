@@ -1,16 +1,9 @@
 import { screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { renderWithQuery } from "@/test/render";
 
 import { ItemList } from "./item-list";
-
-let searchParams = new URLSearchParams();
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
-  useSearchParams: () => searchParams,
-}));
 
 function mockFetch(response: Response | Error) {
   const fetchMock =
@@ -20,10 +13,6 @@ function mockFetch(response: Response | Error) {
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
 }
-
-beforeEach(() => {
-  searchParams = new URLSearchParams();
-});
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -43,15 +32,14 @@ describe("ItemList", () => {
 
     expect(await screen.findByText("노트북")).toBeInTheDocument();
     expect(screen.getByText("회사용")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "수정" })).toHaveAttribute("href", "/items/edit?id=3");
+    expect(screen.getByRole("link", { name: "수정" })).toHaveAttribute("href", "/items/3/edit");
     expect(screen.getByRole("link", { name: "다음" })).toHaveAttribute("href", "/?cursor=next_1");
     expect(screen.queryByRole("link", { name: "처음으로" })).toBeNull();
   });
 
   it("다음 페이지에서는 커서로 조회하고 처음으로 링크를 보여 준다", async () => {
-    searchParams = new URLSearchParams({ cursor: "next_1" });
     const fetchMock = mockFetch(Response.json({ items: [], nextCursor: null }));
-    renderWithQuery(<ItemList />);
+    renderWithQuery(<ItemList />, { route: "/?cursor=next_1" });
 
     expect(await screen.findByText("더 이상 항목이 없습니다.")).toBeInTheDocument();
     expect(fetchMock.mock.calls[0][0]).toBe("/api/items?cursor=next_1");
@@ -59,9 +47,8 @@ describe("ItemList", () => {
   });
 
   it("잘못된 커서는 무시하고 첫 페이지를 조회한다", async () => {
-    searchParams = new URLSearchParams({ cursor: "../../actuator" });
     const fetchMock = mockFetch(Response.json({ items: [], nextCursor: null }));
-    renderWithQuery(<ItemList />);
+    renderWithQuery(<ItemList />, { route: "/?cursor=..%2F..%2Factuator" });
 
     expect(await screen.findByText("아직 항목이 없습니다.")).toBeInTheDocument();
     expect(fetchMock.mock.calls[0][0]).toBe("/api/items");

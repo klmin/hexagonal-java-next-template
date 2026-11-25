@@ -1,5 +1,5 @@
 // 브라우저에서 백엔드 API를 부른다. 경로는 같은 오리진의 /api/... 이다.
-// 배포에서는 nginx 가, 개발 서버에서는 next.config.ts 의 rewrites 가 /api 를 백엔드로 넘긴다
+// 배포에서는 nginx 가, 개발 서버에서는 vite.config.ts 의 proxy 가 /api 를 백엔드로 넘긴다
 
 // 백엔드 오류 응답 (RFC 9457 Problem Details)
 type ProblemDetail = {

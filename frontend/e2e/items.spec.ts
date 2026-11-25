@@ -24,14 +24,13 @@ test("이름이 공백뿐이면 오류를 보여 준다", async ({ page }) => {
   await page.getByLabel("이름").fill("   ");
   await page.getByRole("button", { name: "추가" }).click();
 
-  // Next.js 라우트 안내 요소도 role=alert 라서 폼 안에서 찾는다
   await expect(page.locator("form").getByRole("alert")).toHaveText("이름을 입력해 주세요.");
 });
 
-test("없는 페이지는 404 화면을 보여 준다", async ({ page }) => {
-  const response = await page.goto("/no-such-page");
+// SPA 라서 nginx 는 없는 화면 경로에도 index.html(200)을 주고, 찾을 수 없다는 건 화면이 보여 준다
+test("없는 페이지는 찾을 수 없다고 보여 준다", async ({ page }) => {
+  await page.goto("/no-such-page");
 
-  expect(response?.status()).toBe(404);
   await expect(page.getByText("페이지를 찾을 수 없습니다")).toBeVisible();
 });
 
@@ -46,12 +45,13 @@ test("항목을 수정하면 목록에 바뀐 이름이 보인다", async ({ pag
   const row = page.getByRole("listitem").filter({ hasText: name });
   await row.getByRole("link", { name: "수정" }).click();
 
-  // Next.js 16 은 이전 화면을 숨긴 채 남겨 두므로 수정 화면(main) 안에서 찾는다
   const editPage = page.getByRole("main").filter({
     has: page.getByRole("heading", { name: "항목 수정" }),
   });
-  await expect(page).toHaveURL(/\/items\/edit\?id=\d+$/);
+  await expect(page).toHaveURL(/\/items\/\d+\/edit$/);
   await expect(editPage).toBeVisible();
+  // 주소로 바로 들어와도(새로고침) 같은 화면이 나와야 한다 (nginx 가 index.html 을 준다)
+  await page.reload();
   await expect(editPage.getByLabel("이름")).toHaveValue(name);
   await editPage.getByLabel("이름").fill(renamed);
   await editPage.getByRole("button", { name: "저장" }).click();
@@ -80,7 +80,7 @@ test("항목을 삭제하면 목록에서 사라진다", async ({ page }) => {
 });
 
 test("없는 항목의 수정 화면은 찾을 수 없다고 보여 준다", async ({ page }) => {
-  await page.goto("/items/edit?id=999999999");
+  await page.goto("/items/999999999/edit");
 
   await expect(page.getByText("페이지를 찾을 수 없습니다")).toBeVisible();
 });
@@ -91,7 +91,7 @@ test("수정 화면의 id가 숫자가 아니면 백엔드를 부르지 않는�
     if (new URL(req.url()).pathname.startsWith("/api/")) apiCalls.push(req.url());
   });
 
-  await page.goto("/items/edit?id=1/../../actuator");
+  await page.goto("/items/1%2F..%2F..%2Factuator/edit");
 
   await expect(page.getByText("페이지를 찾을 수 없습니다")).toBeVisible();
   expect(apiCalls).toEqual([]);
