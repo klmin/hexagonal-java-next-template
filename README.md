@@ -1,6 +1,6 @@
 # hexagonal-java-react-template
 
-Spring Boot(헥사고날, Java) 백엔드 + React(Vite) 프론트엔드 모노레포 템플릿. 코틀린 버전은 [hexagonal-kotlin-next-template](https://github.com/klmin/hexagonal-kotlin-next-template).
+Spring Boot(헥사고날, Java) 백엔드 + React(Vite) 프론트엔드 모노레포 템플릿. 코틀린 버전은 [hexagonal-kotlin-react-template](https://github.com/klmin/hexagonal-kotlin-react-template).
 샘플 기능(Item 생성/조회)이 DB부터 화면까지 연결돼 있으니 같은 방식으로 기능을 추가하면 된다.
 
 - `backend/` - Spring Boot 4.2, Java 25, Gradle(Kotlin DSL), PostgreSQL, Flyway
