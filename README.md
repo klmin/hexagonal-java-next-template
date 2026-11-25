@@ -4,7 +4,7 @@ Spring Boot(헥사고날, Java) 백엔드 + Next.js 프론트엔드 모노레포
 샘플 기능(Item 생성/조회)이 DB부터 화면까지 연결돼 있으니 같은 방식으로 기능을 추가하면 된다.
 
 - `backend/` - Spring Boot 4.2, Java 25, Gradle(Kotlin DSL), PostgreSQL, Flyway
-- `frontend/` - Next.js 16, React 19, TypeScript, Tailwind 4
+- `frontend/` - Next.js 16 (정적 export, CSR), React 19, TypeScript, Tailwind 4, TanStack Query. 배포는 nginx가 정적 파일을 서빙하고 `/api`를 백엔드로 넘긴다
 - `compose.yaml` - 전체 스택을 이미지로 실행 (E2E, 로컬 확인)
 - `docs/configuration.md` - 설정값 (환경변수, .env)
 - `docs/authentication.md` - 인증을 붙일 때 위치 규칙 (인증 코드는 없음)
