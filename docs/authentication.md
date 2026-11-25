@@ -141,7 +141,7 @@ mockMvc.perform(put("/api/items/1")
 - 쿠키로 인증하므로 CSRF를 켠다. Spring Security의 SPA용 설정(`CookieCsrfTokenRepository`, 읽을 수 있는 `XSRF-TOKEN` 쿠키)을 쓰고, `src/lib/api/client.ts`의 `request()`가 변경 요청(POST, PUT, DELETE)에 `X-XSRF-TOKEN` 헤더를 붙인다. 기능별 API 함수는 바꾸지 않는다
 - 현재 사용자는 `GET /api/me` 같은 API로 받아 `useQuery`로 쓴다. 화면에서 숨기는 것은 편의일 뿐이고, 권한 검사는 항상 백엔드가 한다
 - 백엔드가 401을 주면 로그인 화면(백엔드의 로그인 시작 경로)으로 보내고, 403은 화면에 오류로 보여 준다 (예상 가능한 오류라 `actions.ts`는 throw하지 않고 상태로 반환)
-- 토큰이나 client secret을 `NEXT_PUBLIC_` 환경변수나 프론트 코드에 넣지 않는다. 빌드 결과는 누구나 받아 볼 수 있다
+- 토큰이나 client secret을 `VITE_` 환경변수나 프론트 코드에 넣지 않는다. 빌드 결과는 누구나 받아 볼 수 있다
 
 ## 인증이 필요 없는 서비스
 

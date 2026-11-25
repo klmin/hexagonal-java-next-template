@@ -1,15 +1,28 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import type { ReactElement } from "react";
+import { MemoryRouter, useLocation } from "react-router";
 
-// TanStack Query 를 쓰는 컴포넌트용 render. 테스트마다 새 QueryClient 를 써서 캐시가 섞이지 않게 하고,
-// 실패한 요청을 다시 보내지 않게 해서 오류 화면이 바로 나오게 한다
-export function renderWithQuery(ui: ReactElement) {
+// 테스트용 render. 새 QueryClient(캐시가 섞이지 않게, 실패하면 바로 오류 화면)와 MemoryRouter 로 감싼다.
+// route 로 시작 주소(예: "/?cursor=abc")를 정하고, 화면 이동은 data-testid="location" 의 값으로 확인한다
+export function renderWithQuery(ui: ReactElement, { route = "/" }: { route?: string } = {}) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
   return {
     queryClient,
-    ...render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>),
+    ...render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={[route]}>
+          {ui}
+          <LocationDisplay />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    ),
   };
+}
+
+function LocationDisplay() {
+  const location = useLocation();
+  return <output data-testid="location">{location.pathname + location.search}</output>;
 }

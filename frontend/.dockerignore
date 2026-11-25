@@ -1,7 +1,8 @@
 node_modules
-.next
-out
+dist
 .env*
 !.env.example
 Dockerfile
 README.md
+playwright-report
+test-results

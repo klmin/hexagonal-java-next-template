@@ -25,7 +25,7 @@ export function listItems(cursor?: string, signal?: AbortSignal): Promise<ItemPa
   return request<ItemPage>(`/api/items${query}`, { signal });
 }
 
-// id 는 URL(?id=)에서 오므로 그대로 믿지 않는다.
+// id 는 URL(/items/:id/edit)에서 오므로 그대로 믿지 않는다.
 // 양의 정수가 아니면 막아서 /api/items/../.. 같은 경로로 백엔드의 다른 API를 부르지 못하게 한다
 export function isItemId(value: unknown): value is number {
   return typeof value === "number" && Number.isSafeInteger(value) && value > 0;

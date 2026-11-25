@@ -1,45 +1,36 @@
-"use client";
-
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { useParams } from "react-router";
 
 import { NotFoundMessage } from "@/components/not-found-message";
 import { Card, CardContent } from "@/components/ui/card";
+import { EditItemForm } from "@/features/items/edit-item-form";
 import { ApiError } from "@/lib/api/client";
 import { getItem, itemKeys, parseItemId } from "@/lib/api/items";
 
-import { EditItemForm } from "./edit-item-form";
-
-// 정적 export 는 빌드 때 모르는 id 로 경로(/items/[id])를 만들 수 없어서 /items/edit?id=1 처럼 쿼리로 받는다
-export default function EditItemPage() {
+// /items/:id/edit
+export function EditItemPage() {
+  const id = parseItemId(useParams().id ?? null);
   return (
     <main className="mx-auto flex w-full max-w-xl flex-col gap-8 px-4 py-12">
       <h1 className="text-2xl font-semibold">항목 수정</h1>
-      {/* useSearchParams 를 쓰는 컴포넌트는 Suspense 안에 둔다 (정적 export 빌드 조건) */}
-      <Suspense fallback={<Loading />}>
-        <EditItem />
-      </Suspense>
+      {/* 숫자가 아닌 id 는 백엔드를 부르지 않는다 */}
+      {id === null ? <NotFoundMessage /> : <EditItem id={id} />}
     </main>
   );
 }
 
-function EditItem() {
-  const id = parseItemId(useSearchParams().get("id"));
-  if (id === null) {
-    return <NotFoundMessage />;
-  }
-  return <EditItemLoader id={id} />;
-}
-
-function EditItemLoader({ id }: { id: number }) {
+function EditItem({ id }: { id: number }) {
   const { data, isPending, error } = useQuery({
     queryKey: itemKeys.detail(id),
     queryFn: ({ signal }) => getItem(id, signal),
   });
 
   if (isPending) {
-    return <Loading />;
+    return (
+      <p role="status" className="text-sm text-muted-foreground">
+        불러오는 중...
+      </p>
+    );
   }
   if (error instanceof ApiError && error.status === 404) {
     return <NotFoundMessage />;
@@ -54,16 +45,9 @@ function EditItemLoader({ id }: { id: number }) {
   return (
     <Card>
       <CardContent>
-        <EditItemForm item={data} />
+        {/* key: 다른 항목으로 바뀌면 폼 상태를 새로 시작한다 */}
+        <EditItemForm key={data.id} item={data} />
       </CardContent>
     </Card>
-  );
-}
-
-function Loading() {
-  return (
-    <p role="status" className="text-sm text-muted-foreground">
-      불러오는 중...
-    </p>
   );
 }

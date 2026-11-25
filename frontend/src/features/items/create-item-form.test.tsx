@@ -7,22 +7,13 @@ import { renderWithQuery } from "@/test/render";
 import { CreateItemForm } from "./create-item-form";
 
 const submitCreateItem = vi.fn();
-const push = vi.fn();
-let searchParams = new URLSearchParams();
 
 vi.mock("./actions", () => ({
   submitCreateItem: (...args: unknown[]) => submitCreateItem(...args),
 }));
 
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push }),
-  useSearchParams: () => searchParams,
-}));
-
 beforeEach(() => {
   submitCreateItem.mockReset();
-  push.mockReset();
-  searchParams = new URLSearchParams();
 });
 
 describe("CreateItemForm", () => {
@@ -60,17 +51,16 @@ describe("CreateItemForm", () => {
     expect(screen.queryByRole("alert")).toBeNull();
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["items"] });
     // 첫 페이지에서는 이동하지 않는다
-    expect(push).not.toHaveBeenCalled();
+    expect(screen.getByTestId("location").textContent).toBe("/");
   });
 
   it("다음 페이지에서 추가하면 첫 페이지로 이동한다", async () => {
     submitCreateItem.mockResolvedValue({ ok: true });
-    searchParams = new URLSearchParams({ cursor: "abc" });
-    renderWithQuery(<CreateItemForm />);
+    renderWithQuery(<CreateItemForm />, { route: "/?cursor=abc" });
 
     await userEvent.type(screen.getByLabelText("이름"), "노트북");
     await userEvent.click(screen.getByRole("button", { name: "추가" }));
 
-    await vi.waitFor(() => expect(push).toHaveBeenCalledWith("/"));
+    await vi.waitFor(() => expect(screen.getByTestId("location").textContent).toBe("/"));
   });
 });

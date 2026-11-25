@@ -1,17 +1,14 @@
-"use client";
-
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { Link, useSearchParams } from "react-router";
 
 import { Button } from "@/components/ui/button";
 import { isCursor, itemKeys, listItems } from "@/lib/api/items";
 
 import { DeleteItemButton } from "./delete-item-button";
 
-// useSearchParams 를 쓰므로 페이지에서 <Suspense> 로 감싼다 (정적 export 빌드 조건)
 export function ItemList() {
-  const cursor = useSearchParams().get("cursor");
+  const [searchParams] = useSearchParams();
+  const cursor = searchParams.get("cursor");
   const current = isCursor(cursor) ? cursor : undefined;
 
   const { data, isPending, isError } = useQuery({
@@ -61,9 +58,7 @@ export function ItemList() {
             </div>
             <div className="flex shrink-0 items-start gap-1">
               <Button variant="ghost" size="sm" asChild>
-                <Link href={`/items/edit?${new URLSearchParams({ id: String(item.id) })}`}>
-                  수정
-                </Link>
+                <Link to={`/items/${item.id}/edit`}>수정</Link>
               </Button>
               <DeleteItemButton id={item.id} name={item.name} />
             </div>
@@ -90,12 +85,12 @@ function PageLinks({
     <nav aria-label="페이지" className="flex gap-2">
       {!isFirstPage && (
         <Button variant="outline" size="sm" asChild>
-          <Link href="/">처음으로</Link>
+          <Link to="/">처음으로</Link>
         </Button>
       )}
       {nextCursor && (
         <Button variant="outline" size="sm" asChild>
-          <Link href={`/?${new URLSearchParams({ cursor: nextCursor })}`}>다음</Link>
+          <Link to={`/?${new URLSearchParams({ cursor: nextCursor })}`}>다음</Link>
         </Button>
       )}
     </nav>

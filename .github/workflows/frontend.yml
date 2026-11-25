@@ -48,8 +48,8 @@ jobs:
       - run: npm test
       - run: npm run build
 
-      - name: 정적 export 결과 확인
-        run: test -f out/index.html && test -f out/404.html && test -f out/items/edit.html
+      - name: 빌드 결과 확인
+        run: test -f dist/index.html && ls dist/assets/*.js
 
       - name: Docker 이미지 빌드 확인
         run: docker build -t frontend .
