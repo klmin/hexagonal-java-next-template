@@ -49,10 +49,10 @@ Spring이 `backend/.env`를 properties 파일로 읽는다 (`application.yml`의
 
 | 변수 | 기본값 | 로컬 | 운영 | 설명 |
 |---|---|---|---|---|
-| `DEV_BACKEND_URL` | http://localhost:8080 | 백엔드 포트가 다를 때만 (`.env.local`) | - | 개발 서버(`npm run dev`)가 `/api`를 넘길 주소. `next.config.ts`에서만 읽는다 |
+| `DEV_BACKEND_URL` | http://localhost:8080 | 백엔드 포트가 다를 때만 (`.env.local`) | - | 개발 서버(`npm run dev`), `vite preview`가 `/api`를 넘길 주소. `vite.config.ts`에서만 읽는다 |
 | `BACKEND_URL` | http://backend:8080 | - | **필수** | Docker 이미지(nginx)가 `/api`를 넘길 주소. 경로 없이 `http://host:port`. k8s에서는 FQDN(`backend.<ns>.svc.cluster.local`). 컨테이너 시작 때 읽으므로 이미지를 다시 빌드할 필요 없음 |
 
-프론트는 정적 파일이라 브라우저에서 읽는 값은 빌드할 때 고정된다(`NEXT_PUBLIC_`). 누구나 볼 수 있으므로 비밀값은 넣지 않는다.
+프론트는 정적 파일이라 브라우저 코드에서 읽는 값(`VITE_` 접두사)은 빌드할 때 고정된다. 누구나 볼 수 있으므로 비밀값은 넣지 않는다.
 Docker 이미지는 3000 포트로 연다(`frontend/nginx/default.conf.template`).
 
 ## 루트 compose.yaml (전체 스택 로컬 확인, E2E)
